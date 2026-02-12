@@ -1,0 +1,17 @@
+{
+  "name": "pilot-indoor-positioning-engine",
+  "version": "1.0.0",
+  "description": "MQTT → Trilateration → Pilot API V3 for indoor BLE positioning",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mathjs": "^12.0.0",
+    "mqtt": "^5.3.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
