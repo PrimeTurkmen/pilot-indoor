@@ -17,6 +17,7 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
     layout: 'fit',
 
     floorPlanBounds: [[0, 0], [1000, 800]],
+    engineBaseUrl: '',
 
     initComponent: function () {
         var me = this;
@@ -36,6 +37,7 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
             render: function () {
                 me.initMap();
                 me.bindDeviceMarkers();
+                me.loadDefaultFloorFromEngine();
             },
             resize: function (panel, width, height) {
                 if (me.mapContainer && me.mapContainer.checkResize) {
@@ -45,6 +47,38 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
         };
 
         me.callParent();
+    },
+
+    /**
+     * If engineBaseUrl is set, load floors from engine and apply first floor's plan + bounds to map.
+     */
+    loadDefaultFloorFromEngine: function () {
+        var me = this;
+        var base = me.engineBaseUrl || '';
+        if (!base) return;
+        Ext.Ajax.request({
+            url: base + '/api/indoor/floors',
+            method: 'GET',
+            success: function (resp) {
+                try {
+                    var data = Ext.JSON.decode(resp.responseText);
+                    var floors = data.floors || [];
+                    if (floors.length) {
+                        var f = floors[0];
+                        var url = f.plan_url;
+                        var b = f.bounds || (f.calibration && f.calibration.points && f.calibration.points.length >= 3) ?
+                            [[0, 0], [1000, 800]] : me.floorPlanBounds;
+                        if (Array.isArray(b[0]) && Array.isArray(b[1])) {
+                            b = [[b[0][1], b[0][0]], [b[1][1], b[1][0]]];
+                        }
+                        if (url && me.updateFloorPlanOverlay) {
+                            me.updateFloorPlanOverlay(url, b);
+                            if (me.map && me.map.fitBounds) me.map.fitBounds(b);
+                        }
+                    }
+                } catch (e) {}
+            }
+        });
     },
 
     /**

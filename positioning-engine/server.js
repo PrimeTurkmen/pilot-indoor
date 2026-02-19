@@ -13,9 +13,35 @@ const { trilaterate } = require('./trilateration');
 const { createKalmanFilter } = require('./kalman');
 const { buildAffineTransform, pixelToGeo, postPosition } = require('./pilot-bridge');
 
-// Load config
+// Load config (mutable for API updates)
 const configPath = path.join(__dirname, 'config.json');
-const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+let config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+function persistConfig() {
+    try {
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Failed to write config.json:', e.message);
+        throw e;
+    }
+}
+
+function refreshFloorMaps() {
+    anchorMap.clear();
+    transformMap.clear();
+    for (const floor of config.floors || []) {
+        const anchors = {};
+        for (const a of floor.anchors || []) {
+            anchors[a.id] = { x: a.x, y: a.y, z: a.z || 0 };
+        }
+        anchorMap.set(floor.id, anchors);
+        const cal = floor.calibration;
+        if (cal && cal.points && cal.points.length >= 3) {
+            const points = cal.points.map(p => ({ pixel: p.pixel, geo: p.geo }));
+            transformMap.set(floor.id, buildAffineTransform(points));
+        }
+    }
+}
 
 const MQTT_BROKER = process.env.MQTT_BROKER || config.mqtt.broker;
 const PILOT_API_URL = process.env.PILOT_API_URL || config.pilot.api_url;
@@ -156,21 +182,80 @@ function processMessage(topic, payload) {
 
 const API_PORT = parseInt(process.env.API_PORT || config.api_port || '3080', 10);
 
-const apiServer = http.createServer((req, res) => {
+function parseJsonBody(req) {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                resolve(body ? JSON.parse(body) : {});
+            } catch (e) {
+                reject(e);
+            }
+        });
+        req.on('error', reject);
+    });
+}
+
+const apiServer = http.createServer(async (req, res) => {
     // CORS for extension (can be on different origin)
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
         res.end();
         return;
     }
-    if (req.method === 'GET' && (req.url === '/api/indoor/devices' || req.url === '/api/indoor/devices/')) {
+    const url = req.url.split('?')[0];
+    if (req.method === 'GET' && (url === '/api/indoor/devices' || url === '/api/indoor/devices/')) {
         const data = Array.from(deviceCache.values());
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(JSON.stringify({ data: data }));
+        return;
+    }
+    if (req.method === 'GET' && (url === '/api/indoor/floors' || url === '/api/indoor/floors/')) {
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({ floors: config.floors || [] }));
+        return;
+    }
+    const putFloorMatch = url.match(/^\/api\/indoor\/floors\/(\d+)\/?$/);
+    if (req.method === 'PUT' && putFloorMatch) {
+        const floorId = parseInt(putFloorMatch[1], 10);
+        let body;
+        try {
+            body = await parseJsonBody(req);
+        } catch (e) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+        }
+        const floors = config.floors || [];
+        const idx = floors.findIndex(f => f.id === floorId);
+        if (idx === -1) {
+            res.writeHead(404);
+            res.end(JSON.stringify({ error: 'Floor not found' }));
+            return;
+        }
+        const floor = floors[idx];
+        if (body.name !== undefined) floor.name = body.name;
+        if (body.plan_url !== undefined) floor.plan_url = body.plan_url;
+        if (body.calibration !== undefined) floor.calibration = body.calibration;
+        if (body.anchors !== undefined) floor.anchors = body.anchors;
+        if (body.bounds !== undefined) floor.bounds = body.bounds;
+        try {
+            refreshFloorMaps();
+            persistConfig();
+        } catch (e) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: e.message }));
+            return;
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({ floor: floor }));
         return;
     }
     res.writeHead(404);

@@ -44,8 +44,10 @@ Ext.define('Store.indoor-positioning.Module', {
         var config = me.appConfig || {};
         var settings = config.settings || {};
 
-        // 1. Shared device store for grid and map markers (single source of truth)
+        // 1. Shared device store and engine API base (for load/save floor plans, calibration, anchors)
         var devicesApiUrl = settings.devicesApiUrl || '/ax/indoor/devices.php';
+        var engineBaseUrl = (devicesApiUrl && devicesApiUrl.indexOf('/api/indoor/devices') !== -1) ?
+            devicesApiUrl.replace(/\/api\/indoor\/devices\/?$/, '') : '';
         var refreshInterval = settings.deviceRefreshInterval || 5000;
         var deviceStore = Ext.create('Ext.data.Store', {
             storeId: 'indoorDevicesStore',
@@ -64,7 +66,8 @@ Ext.define('Store.indoor-positioning.Module', {
         // 3. Create main floor plan map panel (receives store for markers)
         var mainPanel = Ext.create('Store.indoor-positioning.FloorPlanView', {
             deviceStore: deviceStore,
-            floorPlanBounds: settings.defaultFloorPlanBounds || [[0, 0], [1000, 800]]
+            floorPlanBounds: settings.defaultFloorPlanBounds || [[0, 0], [1000, 800]],
+            engineBaseUrl: engineBaseUrl
         });
 
         // 4. Link navigation to map (MANDATORY for Pattern 1)
@@ -99,7 +102,8 @@ Ext.define('Store.indoor-positioning.Module', {
                 tooltip: (typeof l === 'function') ? l('Indoor Settings') : 'Indoor Settings',
                 handler: function () {
                     var win = Ext.create('Store.indoor-positioning.AdminPanel', {
-                        mapPanel: mainPanel
+                        mapPanel: mainPanel,
+                        engineBaseUrl: engineBaseUrl
                     });
                     win.show();
                 }

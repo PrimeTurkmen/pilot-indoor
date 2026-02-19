@@ -36,7 +36,13 @@
 
     <div class="section">
         <h2>Configuration</h2>
-        <p>Floor plans and calibration are managed via AdminPanel. Extension base URL: <code>/store/indoor-positioning/</code>.</p>
+        <p>Set <code>devicesApiUrl</code> in <code>config.json</code> to your positioning engine (e.g. <code>http://your-engine:3080/api/indoor/devices</code>) so the extension can:</p>
+        <ul>
+            <li><strong>Load floor plan</strong> — Select a floor, enter plan URL and bounds, click “Load on map”, then “Save to engine”.</li>
+            <li><strong>Calibration</strong> — Edit 3-point pixel↔geo calibration and save to engine.</li>
+            <li><strong>Anchors</strong> — Edit anchor positions per floor and save to engine.</li>
+        </ul>
+        <p>Extension base URL: <code>/store/indoor-positioning/</code>.</p>
     </div>
 
     <p><em>TAQEEQ Systems · pilot-gps.com</em></p>
