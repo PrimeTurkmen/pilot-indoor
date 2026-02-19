@@ -10,14 +10,17 @@ services:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$SYS/broker/uptime", "-C", "1", "-W", "3"]
+      test: ["CMD", "mosquitto_pub", "-t", "healthcheck", "-m", "ok", "-q", "0"]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 5s
 
   positioning-engine:
     build: .
     container_name: pilot-indoor-engine
+    ports:
+      - "3080:3080"
     depends_on:
       mosquitto:
         condition: service_healthy
@@ -25,6 +28,7 @@ services:
       MQTT_BROKER: mqtt://mosquitto:1883
       PILOT_API_URL: ${PILOT_API_URL:-https://your-server.pilot-gps.com}
       PILOT_API_KEY: ${PILOT_API_KEY:-}
+      MOCK_DATA: "true"
     volumes:
       - ./config.json:/app/config.json:ro
 
