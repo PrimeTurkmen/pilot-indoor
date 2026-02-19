@@ -1,0 +1,84 @@
+{
+  "mqtt": {
+    "broker": "mqtt://localhost:1883",
+    "username": "",
+    "password": "",
+    "topics": {
+      "distances": "pilot/indoor/distances/+",
+      "positions": "pilot/indoor/positions/"
+    }
+  },
+  "pilot": {
+    "api_url": "https://your-server.pilot-gps.com",
+    "api_key": "",
+    "update_interval_ms": 3000
+  },
+  "positioning": {
+    "min_anchors": 3,
+    "max_distance_m": 30,
+    "kalman_enabled": true,
+    "outlier_threshold_m": 10
+  },
+  "floors": [
+    {
+      "id": 1,
+      "name": "Ground Floor",
+      "plan_url": "/plans/floor1.png",
+      "calibration": {
+        "points": [
+          {
+            "pixel": [
+              0,
+              0
+            ],
+            "geo": [
+              25.2048,
+              55.2708
+            ]
+          },
+          {
+            "pixel": [
+              1000,
+              0
+            ],
+            "geo": [
+              25.2048,
+              55.2718
+            ]
+          },
+          {
+            "pixel": [
+              0,
+              800
+            ],
+            "geo": [
+              25.2055,
+              55.2708
+            ]
+          }
+        ]
+      },
+      "anchors": [
+        {
+          "id": "anchor_01",
+          "x": 0,
+          "y": 0,
+          "z": 2.5
+        },
+        {
+          "id": "anchor_02",
+          "x": 20,
+          "y": 0,
+          "z": 2.5
+        },
+        {
+          "id": "anchor_03",
+          "x": 10,
+          "y": 15,
+          "z": 2.5
+        }
+      ]
+    }
+  ],
+  "api_port": 3080
+}

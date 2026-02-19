@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Local / IDE
+tmp/
+.cursor/
+.autopilot.json
+*.log
+.DS_Store
+
+# Build / env
+.env
+.env.local
+
+# Reference repo (add as submodule if needed)
+pilot_extensions/

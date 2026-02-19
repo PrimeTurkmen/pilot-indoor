@@ -1,0 +1,19 @@
+{
+  "appName": "Indoor Positioning",
+  "version": "1.0.0",
+  "description": "Indoor people and asset tracking with BLE 6.0 Channel Sounding for PILOT Telematics",
+  "loadOrder": [
+    "IndoorNavPanel.js",
+    "FloorPlanView.js",
+    "DeviceGrid.js",
+    "ZoneManager.js",
+    "AdminPanel.js",
+    "Module.js"
+  ],
+  "styles": "styles.css",
+  "settings": {
+    "devicesApiUrl": "",
+    "defaultFloorPlanBounds": [[0, 0], [1000, 800]],
+    "deviceRefreshInterval": 5000
+  }
+}

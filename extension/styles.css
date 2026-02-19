@@ -1,0 +1,267 @@
+/**
+ * PILOT Extension — Indoor Positioning
+ * Organic, easy-to-use interface styles
+ */
+
+/* ---- Design tokens ---- */
+:root {
+    --indoor-radius: 10px;
+    --indoor-radius-sm: 6px;
+    --indoor-space: 12px;
+    --indoor-space-sm: 8px;
+    --indoor-space-lg: 16px;
+    --indoor-accent: #0d9488;
+    --indoor-accent-soft: rgba(13, 148, 136, 0.12);
+    --indoor-accent-hover: #0f766e;
+    --indoor-bg: #f8fafc;
+    --indoor-bg-panel: #ffffff;
+    --indoor-border: #e2e8f0;
+    --indoor-text: #1e293b;
+    --indoor-text-muted: #64748b;
+    --indoor-online: #059669;
+    --indoor-offline: #94a3b8;
+    --indoor-low-battery: #d97706;
+    --indoor-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --indoor-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ---- Left nav panel (Building → Floor → Zone) ---- */
+.x-panel.indoor-nav-panel .x-panel-header {
+    background: var(--indoor-bg-panel);
+    border-bottom: 1px solid var(--indoor-border);
+    padding: var(--indoor-space-lg);
+}
+.x-panel.indoor-nav-panel .x-toolbar {
+    background: var(--indoor-bg);
+    padding: var(--indoor-space);
+    border-bottom: 1px solid var(--indoor-border);
+    border-radius: 0 0 var(--indoor-radius-sm) var(--indoor-radius-sm);
+}
+.x-panel.indoor-nav-panel .x-form-item {
+    margin-bottom: 0;
+}
+.x-panel.indoor-nav-panel .x-form-text {
+    border-radius: var(--indoor-radius-sm);
+    border-color: var(--indoor-border);
+    padding: 8px 12px;
+}
+.x-panel.indoor-nav-panel .x-form-text:focus {
+    border-color: var(--indoor-accent);
+    box-shadow: 0 0 0 2px var(--indoor-accent-soft);
+}
+.x-panel.indoor-nav-panel .x-tree-view {
+    background: var(--indoor-bg-panel);
+}
+.x-panel.indoor-nav-panel .x-grid-row {
+    transition: background 0.15s ease;
+}
+.x-panel.indoor-nav-panel .x-grid-row:hover {
+    background: var(--indoor-accent-soft);
+}
+.x-panel.indoor-nav-panel .x-tree-column .x-grid-cell-inner {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--indoor-text);
+}
+.x-panel.indoor-nav-panel .x-tree-expander {
+    color: var(--indoor-text-muted);
+}
+
+/* ---- Status indicators ---- */
+.indoor-status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+.indoor-online {
+    background-color: var(--indoor-online);
+}
+.indoor-offline {
+    background-color: var(--indoor-offline);
+}
+.indoor-low-battery {
+    background-color: var(--indoor-low-battery);
+}
+.indoor-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.indoor-status-badge.indoor-online {
+    background: rgba(5, 150, 105, 0.15);
+    color: var(--indoor-online);
+}
+.indoor-status-badge.indoor-offline {
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--indoor-offline);
+}
+.indoor-status-badge.indoor-low-battery {
+    background: rgba(217, 119, 6, 0.15);
+    color: var(--indoor-low-battery);
+}
+
+/* ---- Floor plan / map area ---- */
+.indoor-floor-plan .x-panel-body {
+    background: #e8eeef;
+    border-radius: var(--indoor-radius);
+}
+.indoor-floor-plan.map_canvas .x-panel-body {
+    border: none;
+}
+
+/* ---- Devices grid (docked at bottom) ---- */
+.indoor-device-grid .x-panel-header {
+    background: var(--indoor-bg-panel);
+    border-bottom: 1px solid var(--indoor-border);
+    padding: var(--indoor-space) var(--indoor-space-lg);
+    font-weight: 600;
+    color: var(--indoor-text);
+}
+.indoor-device-grid .x-toolbar {
+    background: var(--indoor-bg);
+    padding: var(--indoor-space-sm) var(--indoor-space);
+    border-bottom: 1px solid var(--indoor-border);
+}
+.indoor-device-grid .x-btn {
+    border-radius: var(--indoor-radius-sm);
+    padding: 6px 12px;
+}
+.indoor-device-grid .x-btn-default-toolbar-small {
+    border-color: var(--indoor-border);
+    color: var(--indoor-text);
+}
+.indoor-device-grid .x-btn-default-toolbar-small:hover {
+    background: var(--indoor-accent-soft);
+    border-color: var(--indoor-accent);
+    color: var(--indoor-accent-hover);
+}
+.indoor-device-grid .x-grid-body {
+    background: var(--indoor-bg-panel);
+}
+.indoor-device-grid .x-grid-row {
+    transition: background 0.15s ease;
+}
+.indoor-device-grid .x-grid-row:hover {
+    background: var(--indoor-accent-soft);
+}
+.indoor-device-grid .x-grid-cell-inner {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--indoor-text);
+}
+.indoor-device-grid .x-grid-row-alt .x-grid-cell {
+    background: rgba(248, 250, 252, 0.8);
+}
+.indoor-device-grid .x-grid-empty {
+    color: var(--indoor-text-muted);
+    font-size: 14px;
+    padding: 40px 20px;
+    text-align: center;
+    line-height: 1.5;
+}
+.indoor-device-grid .x-column-header {
+    background: var(--indoor-bg);
+    color: var(--indoor-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--indoor-border);
+}
+
+/* ---- Zone Manager window ---- */
+.indoor-zonemanager .x-window-header {
+    background: var(--indoor-bg-panel);
+    border-bottom: 1px solid var(--indoor-border);
+    padding: var(--indoor-space-lg);
+}
+.indoor-zonemanager .x-toolbar .x-btn {
+    border-radius: var(--indoor-radius-sm);
+    margin-right: 6px;
+}
+.indoor-zonemanager .x-btn-default-small {
+    border-color: var(--indoor-border);
+}
+.indoor-zonemanager .x-btn-default-small.x-btn-over,
+.indoor-zonemanager .x-btn-default-small:hover {
+    border-color: var(--indoor-accent);
+    background: var(--indoor-accent-soft);
+    color: var(--indoor-accent-hover);
+}
+.indoor-zonemanager .x-fieldset-header {
+    font-weight: 600;
+    color: var(--indoor-text);
+    font-size: 13px;
+}
+.indoor-zonemanager .x-fieldset {
+    border-radius: var(--indoor-radius-sm);
+    border-color: var(--indoor-border);
+    margin-bottom: var(--indoor-space);
+}
+.indoor-zonemanager .x-grid-cell-inner {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+/* ---- Admin / Settings window ---- */
+.indoor-adminpanel .x-window-header {
+    background: var(--indoor-bg-panel);
+    border-bottom: 1px solid var(--indoor-border);
+    padding: var(--indoor-space-lg);
+}
+.indoor-adminpanel .x-tab-bar {
+    background: var(--indoor-bg);
+    border-bottom: 1px solid var(--indoor-border);
+}
+.indoor-adminpanel .x-tab {
+    padding: 12px 20px;
+    font-weight: 500;
+    color: var(--indoor-text-muted);
+}
+.indoor-adminpanel .x-tab.x-tab-active {
+    color: var(--indoor-accent);
+    border-bottom: 2px solid var(--indoor-accent);
+}
+.indoor-adminpanel .x-fieldset-header {
+    font-weight: 600;
+    color: var(--indoor-text);
+    font-size: 13px;
+}
+.indoor-adminpanel .x-fieldset {
+    border-radius: var(--indoor-radius-sm);
+    border-color: var(--indoor-border);
+    margin-bottom: var(--indoor-space);
+}
+.indoor-adminpanel .x-form-display-field {
+    color: var(--indoor-text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.indoor-adminpanel .x-btn-default-medium {
+    border-radius: var(--indoor-radius-sm);
+    background: var(--indoor-accent);
+    border-color: var(--indoor-accent);
+    color: #fff;
+}
+.indoor-adminpanel .x-btn-default-medium:hover {
+    background: var(--indoor-accent-hover);
+    border-color: var(--indoor-accent-hover);
+}
+
+/* ---- Battery and type pills in grid ---- */
+.indoor-device-grid .indoor-online { color: var(--indoor-online); }
+.indoor-device-grid .indoor-offline { color: var(--indoor-offline); }
+.indoor-device-grid .indoor-low-battery { color: var(--indoor-low-battery); }
+
+/* ---- Legacy / fallback ---- */
+.indoor-nav-placeholder {
+    font-size: 13px;
+    color: var(--indoor-text-muted);
+}
