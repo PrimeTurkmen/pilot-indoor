@@ -285,3 +285,30 @@ client.on('message', (topic, payload) => {
 client.on('error', err => {
     console.error('MQTT error:', err);
 });
+
+//  Mock / demo data (seeded when MOCK_DATA env is set or no real MQTT data) 
+if (process.env.MOCK_DATA === 'true' || process.env.MOCK_DATA === '1') {
+  const mockDevices = [
+    { id: 'tag_001', name: 'Forklift A',   type: 'asset',  zone: 'Warehouse', battery: 87, x: 5.2,  y: 3.1,  floor: 1 },
+    { id: 'tag_002', name: 'John D.',      type: 'person', zone: 'Office',    battery: 64, x: 12.0, y: 8.5,  floor: 1 },
+    { id: 'tag_003', name: 'Pallet Jack B', type: 'asset',  zone: 'Loading',   battery: 92, x: 18.3, y: 1.7,  floor: 1 },
+    { id: 'tag_004', name: 'Sarah M.',     type: 'person', zone: 'Warehouse', battery: 45, x: 8.8,  y: 11.2, floor: 1 },
+    { id: 'tag_005', name: 'Drone C',      type: 'asset',  zone: 'Staging',   battery: 78, x: 15.0, y: 6.0,  floor: 1 },
+  ];
+  const now = Math.floor(Date.now() / 1000);
+  for (const d of mockDevices) {
+    deviceCache.set(d.id, {
+      id: d.id,
+      name: d.name,
+      type: d.type,
+      zone: d.zone,
+      battery: d.battery,
+      lastUpdate: now,
+      status: 'online',
+      x: Math.round(d.x * 100) / 100,
+      y: Math.round(d.y * 100) / 100,
+      floor: d.floor
+    });
+  }
+  console.log('Mock data loaded:', mockDevices.length, 'devices');
+}
