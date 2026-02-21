@@ -258,6 +258,96 @@ const apiServer = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ floor: floor }));
         return;
     }
+    const postPlanMatch = url.match(/^\/api\/indoor\/floors\/(\d+)\/plan\/?$/);
+    if (req.method === 'POST' && postPlanMatch) {
+        const floorId = parseInt(postPlanMatch[1], 10);
+        let body;
+        try {
+            body = await parseJsonBody(req);
+        } catch (e) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+        }
+        const base64 = body.plan;
+        const filename = (body.filename || 'floor-plan.png').replace(/[^a-zA-Z0-9._-]/g, '_');
+        if (!base64) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Missing plan (base64)' }));
+            return;
+        }
+        const floors = config.floors || [];
+        const idx = floors.findIndex(f => f.id === floorId);
+        if (idx === -1) {
+            res.writeHead(404);
+            res.end(JSON.stringify({ error: 'Floor not found' }));
+            return;
+        }
+        const plansDir = path.join(__dirname, 'plans');
+        if (!fs.existsSync(plansDir)) fs.mkdirSync(plansDir, { recursive: true });
+        const ext = path.extname(filename) || '.png';
+        const safeName = path.basename(filename, ext) + ext;
+        const filePath = path.join(plansDir, safeName);
+        try {
+            const buf = Buffer.from(base64, 'base64');
+            fs.writeFileSync(filePath, buf);
+        } catch (e) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to save file: ' + e.message }));
+            return;
+        }
+        const planUrl = '/plans/' + safeName;
+        floors[idx].plan_url = planUrl;
+        if (body.bounds) floors[idx].bounds = body.bounds;
+        try {
+            persistConfig();
+        } catch (e) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: e.message }));
+            return;
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({ plan_url: planUrl, floor: floors[idx] }));
+        return;
+    }
+    // Serve /plans/ for floor plan images (relative URLs like /plans/floor1.png)
+    if (req.method === 'GET' && url.startsWith('/plans/')) {
+        const plansDir = path.join(__dirname, 'plans');
+        const filePath = path.join(plansDir, url.slice('/plans/'.length));
+        const safePath = path.resolve(filePath);
+        if (safePath.startsWith(plansDir) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+            const ext = path.extname(safePath).toLowerCase();
+            const types = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+            res.setHeader('Content-Type', types[ext] || 'application/octet-stream');
+            res.writeHead(200);
+            res.end(fs.readFileSync(safePath));
+            return;
+        }
+    }
+    // Standalone demo frontend (no PILOT required)
+    const standaloneDir = path.join(__dirname, 'standalone');
+    if (req.method === 'GET' && (url === '/' || url === '/standalone' || url === '/standalone/' || url === '/standalone/index.html')) {
+        const filePath = path.join(standaloneDir, 'index.html');
+        if (fs.existsSync(filePath)) {
+            res.setHeader('Content-Type', 'text/html');
+            res.writeHead(200);
+            res.end(fs.readFileSync(filePath, 'utf8'));
+            return;
+        }
+    }
+    if (req.method === 'GET' && url.startsWith('/standalone/')) {
+        const filePath = path.join(standaloneDir, url.slice('/standalone/'.length)) || path.join(standaloneDir, 'index.html');
+        const safePath = path.resolve(filePath);
+        if (safePath.startsWith(standaloneDir) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+            const ext = path.extname(safePath);
+            const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json' };
+            res.setHeader('Content-Type', types[ext] || 'application/octet-stream');
+            res.writeHead(200);
+            res.end(fs.readFileSync(safePath));
+            return;
+        }
+    }
     res.writeHead(404);
     res.end();
 });

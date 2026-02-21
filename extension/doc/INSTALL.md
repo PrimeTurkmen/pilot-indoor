@@ -47,7 +47,16 @@ Ensure these files are available:
 - `styles.css`
 - `doc/index.html` (optional, for documentation)
 
-## 2. Load order in PILOT Admin
+## 2. Access control (authentication)
+
+**Who can use the extension:** Only users that an admin has allowed.
+
+- In **PILOT Admin → Extensions** (or Applications), register the extension and assign it to the desired **users or roles**.
+- Users who are granted access to this extension will see the Indoor Positioning tab and features.
+- Users without access will not see the extension; PILOT enforces this based on your Admin configuration.
+- The extension runs inside PILOT’s authenticated session—no separate login is required.
+
+## 3. Load order in PILOT Admin
 
 In **PILOT Admin → Extensions**, register the extension with:
 
@@ -62,7 +71,7 @@ In **PILOT Admin → Extensions**, register the extension with:
 
 PILOT will load the extension and call `initModule()` on the Module class.
 
-## 3. Devices API (backend)
+## 4. Devices API (backend)
 
 The Devices grid and map markers need a JSON API that returns indoor devices.
 
@@ -86,13 +95,13 @@ If the extension is served from a different origin than the engine, the engine e
 **Option B — PILOT server**  
 Implement or proxy on your PILOT server, e.g. `/ax/indoor/devices.php`, returning the same JSON shape. Leave `devicesApiUrl` empty in config to use that path by default.
 
-## 4. Verify
+## 5. Verify
 
 1. Open PILOT in the browser.
 2. Use the **Indoor Positioning** tab in the left navigation (or the map-marker header button).
 3. The floor plan and Devices grid should load. If the devices API is not configured or unreachable, the grid will be empty and the map will have no markers.
 
-## 5. Base URL override (optional)
+## 6. Base URL override (optional)
 
 If your extension is not at `/store/indoor-positioning/`, set the base URL before the extension loads so that `config.json` and `styles.css` are loaded from the correct path:
 

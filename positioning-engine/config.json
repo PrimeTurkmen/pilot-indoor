@@ -23,7 +23,7 @@
     {
       "id": 1,
       "name": "Ground Floor",
-      "plan_url": "/plans/floor1.png",
+      "plan_url": "/plans/placeholder.svg",
       "calibration": {
         "points": [
           {

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Positioning — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0c0e14;
+            --bg-secondary: #161a22;
+            --bg-tertiary: #1e232d;
+            --bg-card: #242b38;
+            --border: #2d3648;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --success-dim: #16a34a;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; height: 100vh; display: flex; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 300px; min-width: 280px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), #6366f1); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+        .logo-sub { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+        
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 0; }
+        .nav-section { margin-bottom: 24px; }
+        .nav-section-title { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 20px; margin-bottom: 10px; }
+        .floor-list { list-style: none; }
+        .floor-item { padding: 10px 20px; margin: 2px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
+        .floor-item:hover { background: var(--bg-tertiary); }
+        .floor-item.active { background: rgba(59, 130, 246, 0.15); color: var(--accent); border-left: 3px solid var(--accent); margin-left: 9px; padding-left: 17px; }
+        .floor-item .floor-icon { width: 28px; height: 28px; background: var(--bg-card); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary); }
+        .floor-item .floor-name { font-weight: 500; font-size: 0.9rem; }
+        
+        .device-search { padding: 0 20px 12px; }
+        .device-search input { width: 100%; padding: 10px 14px 10px 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); font-size: 0.85rem; outline: none; transition: border 0.2s; }
+        .device-search input:focus { border-color: var(--accent); }
+        .device-search { position: relative; }
+        .device-search::before { content: '🔍'; position: absolute; left: 28px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.5; }
+        
+        .device-list { list-style: none; padding: 0 12px; }
+        .device-item { padding: 12px 14px; margin-bottom: 6px; background: var(--bg-card); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; display: flex; align-items: center; gap: 12px; }
+        .device-item:hover { background: var(--bg-tertiary); border-color: var(--border); transform: translateX(2px); }
+        .device-item .device-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .device-item .device-avatar.person { background: rgba(59, 130, 246, 0.2); }
+        .device-item .device-avatar.asset { background: rgba(245, 158, 11, 0.2); }
+        .device-item .device-info { flex: 1; min-width: 0; }
+        .device-item .device-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .device-item .device-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .device-item .device-status { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .device-item .badge { padding: 3px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        .device-item .badge.online { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .device-item .badge.offline { background: rgba(100, 116, 139, 0.3); color: var(--text-muted); }
+        .device-item .battery { font-size: 0.7rem; color: var(--text-muted); }
+        .empty-state { padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+        
+        /* Main */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .header { height: 56px; padding: 0 24px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-title { font-weight: 600; font-size: 1rem; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 16px; }
+        .btn-icon:hover { background: var(--bg-card); color: var(--text-primary); border-color: var(--accent); }
+        .status-pill { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+        .status-pill.online { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .status-pill.online::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+        .status-pill.offline { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .map-container { flex: 1; min-height: 0; position: relative; }
+        #map { width: 100%; height: 100%; background: var(--bg-primary); }
+        .map-overlay { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 20px; font-size: 0.8rem; color: var(--text-secondary); box-shadow: var(--shadow); }
+        
+        /* Modal */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px); }
+        .modal-backdrop.open { display: flex; animation: fadeIn 0.2s; }
+        .modal { width: 100%; max-width: 480px; background: var(--bg-secondary); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; animation: slideUp 0.25s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-weight: 600; font-size: 1.1rem; }
+        .modal-close { width: 32px; height: 32px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: all 0.15s; }
+        .modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .modal-body { padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        .form-input:focus { border-color: var(--accent); }
+        .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
+        .upload-zone .upload-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.7; }
+        .upload-zone .upload-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .upload-zone .upload-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        input[type="file"] { display: none; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+        .btn { padding: 10px 18px; border-radius: var(--radius-sm); border: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card); }
+        
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: var(--radius); font-size: 0.9rem; font-weight: 500; z-index: 9999; box-shadow: var(--shadow); animation: toastIn 0.3s; }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--error); color: white; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">📡</div>
+                <div>
+                    <div class="logo-text">Indoor Positioning</div>
+                    <div class="logo-sub">BLE Channel Sounding · ±1m</div>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Site</div>
+                <ul class="floor-list" id="floorList"></ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Devices & Assets</div>
+                <div class="device-search">
+                    <input type="text" id="deviceSearch" placeholder="Search devices..." autocomplete="off">
+                </div>
+                <ul class="device-list" id="devices"></ul>
+            </div>
+        </nav>
+    </aside>
+    
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <span class="header-title" id="floorTitle">Ground Floor</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="btnRefresh" title="Refresh">🔄</button>
+                <button class="btn-icon" id="btnSettings" title="Floor plan & settings">⚙️</button>
+                <span class="status-pill" id="status">Connecting…</span>
+            </div>
+        </header>
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-overlay" id="mapOverlay">5 devices · Floor 1</div>
+        </div>
+    </main>
+    
+    <div class="modal-backdrop" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Floor plan & settings</span>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Upload floor plan</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📎</div>
+                        <div class="upload-text">Drop image here or click to upload</div>
+                        <div class="upload-hint">PNG, JPG, SVG · max 10MB</div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Or enter URL</label>
+                    <input type="text" class="form-input" id="planUrl" placeholder="/plans/placeholder.svg">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bounds (minX, minY, maxX, maxY)</label>
+                    <input type="text" class="form-input" id="bounds" placeholder="0, 0, 1000, 800" value="0, 0, 1000, 800">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="loadPlan">Load on map</button>
+                    <button class="btn btn-secondary" id="savePlan">Save to engine</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let map, markerLayer, floorPlanOverlay = null;
+        let currentFloorId = 1, floors = [], devices = [];
+        let deviceSearchFilter = '';
+
+        function initMap() {
+            map = L.map('map', { crs: L.CRS.Simple }).setView([400, 500], 1);
+            markerLayer = L.layerGroup().addTo(map);
+        }
+
+        function parseBounds(s) {
+            const parts = (s || '0,0,1000,800').split(',').map(x => parseFloat(x.trim()));
+            if (parts.length >= 4) return [[parts[1], parts[0]], [parts[3], parts[2]]];
+            return [[0, 0], [800, 1000]];
+        }
+
+        function loadFloorPlan() {
+            const url = document.getElementById('planUrl').value.trim();
+            const bounds = parseBounds(document.getElementById('bounds').value);
+            if (!url) return;
+            if (floorPlanOverlay) { map.removeLayer(floorPlanOverlay); floorPlanOverlay = null; }
+            try {
+                floorPlanOverlay = L.imageOverlay(url, bounds).addTo(map);
+                map.fitBounds(bounds);
+                showToast('Floor plan loaded', 'success');
+            } catch (e) {
+                showToast('Failed to load image', 'error');
+            }
+        }
+
+        function showToast(msg, type) {
+            const el = document.createElement('div');
+            el.className = 'toast ' + (type || 'success');
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2500);
+        }
+
+        function uploadFloorPlan(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showToast('Select an image (PNG, JPG, SVG)', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                if (!base64) { showToast('Failed to read file', 'error'); return; }
+                const boundsVal = document.getElementById('bounds').value;
+                const p = boundsVal.split(',').map(x => parseFloat(x.trim()) || 0);
+                fetch(API_BASE + '/api/indoor/floors/' + currentFloorId + '/plan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: base64, filename: file.name || 'floor-plan.png', bounds: [[p[0]||0, p[1]||0], [p[2]||1000, p[3]||800]] })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    document.getElementById('planUrl').value = data.plan_url;
+                    loadFloorPlan();
+                    showToast('Floor plan uploaded', 'success');
+                })
+                .catch(e => showToast(e.message || 'Upload failed', 'error'));
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function savePlanToEngine() {
+            const url = document.getElementById('planUrl').value.trim();
+            const b = parseBounds(document.getElementById('bounds').value);
+            if (!url) { showToast('Enter plan URL first', 'error'); return; }
+            fetch(API_BASE + '/api/indoor/floors/' + currentFloorId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan_url: url, bounds: [[b[0][1], b[0][0]], [b[1][1], b[1][0]]] })
+            })
+            .then(r => r.json())
+            .then(data => { if (data.error) throw new Error(data.error); showToast('Saved to engine', 'success'); })
+            .catch(e => showToast(e.message || 'Save failed', 'error'));
+        }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function renderFloorList() {
+            const ul = document.getElementById('floorList');
+            ul.innerHTML = floors.map(f => `
+                <li class="floor-item ${f.id === currentFloorId ? 'active' : ''}" data-floor-id="${f.id}">
+                    <span class="floor-icon">${String(f.id)}</span>
+                    <span class="floor-name">${escapeHtml(f.name || 'Floor ' + f.id)}</span>
+                </li>
+            `).join('');
+            ul.querySelectorAll('.floor-item').forEach(el => {
+                el.addEventListener('click', () => selectFloor(parseInt(el.dataset.floorId)));
+            });
+        }
+
+        function selectFloor(id) {
+            currentFloorId = id;
+            const f = floors.find(x => x.id === id);
+            document.getElementById('floorTitle').textContent = f ? (f.name || 'Floor ' + id) : 'Floor ' + id;
+            renderFloorList();
+            if (f && f.plan_url) {
+                document.getElementById('planUrl').value = f.plan_url;
+                if (f.bounds && f.bounds[0] && f.bounds[1]) {
+                    const b = f.bounds;
+                    document.getElementById('bounds').value = `${b[0][0]}, ${b[0][1]}, ${b[1][0]}, ${b[1][1]}`;
+                }
+                loadFloorPlan();
+            }
+        }
+
+        function renderDevices() {
+            const list = document.getElementById('devices');
+            const filtered = devices.filter(d => {
+                const search = deviceSearchFilter.toLowerCase();
+                if (!search) return true;
+                const name = (d.name || d.id || '').toLowerCase();
+                const zone = (d.zone || '').toLowerCase();
+                return name.includes(search) || zone.includes(search);
+            });
+            const floorDevices = filtered.filter(d => (d.floor || 1) === currentFloorId);
+            if (floorDevices.length === 0) {
+                list.innerHTML = '<li class="empty-state">No devices on this floor.<br>Connect BLE tags or enable mock data.</li>';
+            } else {
+                list.innerHTML = floorDevices.map(d => {
+                    const isPerson = (d.type || 'person') === 'person';
+                    const icon = isPerson ? '👤' : '📦';
+                    const status = d.status === 'online' ? 'online' : 'offline';
+                    return `
+                        <li class="device-item" data-x="${d.x||0}" data-y="${d.y||0}" data-name="${escapeHtml(d.name||d.id)}">
+                            <span class="device-avatar ${isPerson?'person':'asset'}">${icon}</span>
+                            <div class="device-info">
+                                <div class="device-name">${escapeHtml(d.name || d.id)}</div>
+                                <div class="device-meta">${escapeHtml(d.zone || '')} · (${(d.x||0).toFixed(1)}, ${(d.y||0).toFixed(1)})</div>
+                            </div>
+                            <div class="device-status">
+                                <span class="badge ${status}">${status}</span>
+                                ${d.battery != null ? `<span class="battery">${d.battery}%</span>` : ''}
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+                list.querySelectorAll('.device-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const x = parseFloat(el.dataset.x), y = parseFloat(el.dataset.y);
+                        if (map && !isNaN(x) && !isNaN(y)) map.setView([y, x], 3);
+                    });
+                });
+            }
+            document.getElementById('mapOverlay').textContent = `${filtered.length} devices · Floor ${currentFloorId}`;
+            renderMarkers(floorDevices);
+        }
+
+        function renderMarkers(data) {
+            markerLayer.clearLayers();
+            (data || []).forEach(d => {
+                const x = d.x, y = d.y;
+                if (x == null || y == null) return;
+                const isPerson = (d.type || 'person') === 'person';
+                const color = d.status === 'online' ? (isPerson ? '#3b82f6' : '#f59e0b') : '#64748b';
+                const m = L.circleMarker([y, x], { radius: 10, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.9 });
+                m.bindPopup(`<div style="font-family:Inter,sans-serif;padding:4px;"><b>${escapeHtml(d.name || d.id)}</b><br/>${escapeHtml(d.zone || '')}<br/>Battery: ${d.battery != null ? d.battery + '%' : '-'}</div>`);
+                markerLayer.addLayer(m);
+            });
+        }
+
+        function updateDevices(data) {
+            document.getElementById('status').textContent = 'Connected';
+            document.getElementById('status').className = 'status-pill online';
+            devices = (data && data.data) ? data.data : [];
+            renderDevices();
+        }
+
+        function fetchDevices() {
+            fetch(API_BASE + '/api/indoor/devices')
+                .then(r => r.json())
+                .then(updateDevices)
+                .catch(() => {
+                    document.getElementById('status').textContent = 'Offline';
+                    document.getElementById('status').className = 'status-pill offline';
+                    devices = [];
+                    renderDevices();
+                });
+        }
+
+        function loadFloors() {
+            fetch(API_BASE + '/api/indoor/floors')
+                .then(r => r.json())
+                .then(res => {
+                    floors = res.floors || [];
+                    if (floors.length && !currentFloorId) currentFloorId = floors[0].id;
+                    const f = floors.find(x => x.id === currentFloorId) || floors[0];
+                    if (f) {
+                        currentFloorId = f.id;
+                        document.getElementById('floorTitle').textContent = f.name || 'Floor ' + f.id;
+                        document.getElementById('planUrl').value = f.plan_url || '/plans/placeholder.svg';
+                        if (f.bounds && f.bounds[0] && f.bounds[1]) {
+                            const b = f.bounds;
+                            document.getElementById('bounds').value = `${b[0][0]}, ${b[0][1]}, ${b[1][0]}, ${b[1][1]}`;
+                        }
+                        loadFloorPlan();
+                    }
+                    renderFloorList();
+                })
+                .catch(() => {
+                    floors = [{ id: 1, name: 'Ground Floor', plan_url: '/plans/placeholder.svg' }];
+                    currentFloorId = 1;
+                    renderFloorList();
+                    loadFloorPlan();
+                });
+        }
+
+        document.getElementById('loadPlan').addEventListener('click', loadFloorPlan);
+        document.getElementById('savePlan').addEventListener('click', savePlanToEngine);
+        document.getElementById('btnRefresh').addEventListener('click', () => { fetchDevices(); loadFloors(); });
+        document.getElementById('btnSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.add('open'));
+        document.getElementById('modalClose').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('open'));
+        document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') e.target.classList.remove('open'); });
+        document.getElementById('uploadZone').addEventListener('click', () => document.getElementById('fileInput').click());
+        document.getElementById('fileInput').addEventListener('change', e => { const f = e.target.files[0]; if (f) uploadFloorPlan(f); e.target.value = ''; });
+        document.getElementById('uploadZone').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); });
+        document.getElementById('uploadZone').addEventListener('dragleave', () => document.getElementById('uploadZone').classList.remove('dragover'));
+        document.getElementById('uploadZone').addEventListener('drop', e => { e.preventDefault(); document.getElementById('uploadZone').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) uploadFloorPlan(f); });
+        document.getElementById('deviceSearch').addEventListener('input', e => { deviceSearchFilter = e.target.value; renderDevices(); });
+
+        initMap();
+        loadFloors();
+        fetchDevices();
+        setInterval(fetchDevices, 3000);
+    </script>
+</body>
+</html>

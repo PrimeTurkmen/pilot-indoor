@@ -38,23 +38,36 @@ PILOT Indoor Positioning enables tracking of people and assets inside buildings 
 1. Host the **entire** `extension/` folder on your web server so PILOT can load it (e.g. `https://yourserver/store/indoor-positioning/`). All JS, `config.json`, and `styles.css` must be reachable at that base path.
 2. In **PILOT Admin → Extensions**, register the extension with base URL:  
    `/store/indoor-positioning/` (or the full URL used above).
-3. **Load order** (if configurable): load in this order so the app works inside PILOT:  
+3. **Access control:** Assign the extension to the users or roles who should see it. Only admin-granted users will have access.
+4. **Load order** (if configurable): load in this order so the app works inside PILOT:  
    `IndoorNavPanel.js` → `FloorPlanView.js` → `DeviceGrid.js` → `ZoneManager.js` → `AdminPanel.js` → `Module.js`. Then load `styles.css`. PILOT will call `initModule()` on the Module.
-4. **Devices API:** The extension needs a JSON API for the device list and positions. Two options:
+5. **Devices API:** The extension needs a JSON API for the device list and positions. Two options:
    - **Positioning engine (recommended):** The engine exposes **GET** `http://engine-host:3080/api/indoor/devices` (CORS enabled). Set in `extension/config.json` → `settings.devicesApiUrl` to that URL (e.g. `http://your-engine:3080/api/indoor/devices`).
    - **PILOT server:** Implement or proxy `/ax/indoor/devices.php` returning `{ "data": [ { "id", "name", "type", "zone", "battery", "lastUpdate", "status", "x", "y", "floor" }, ... ] }`. Leave `devicesApiUrl` empty to use this path.
-5. See `extension/doc/INSTALL.md` for step-by-step installation and base URL override.
+6. See `extension/doc/INSTALL.md` for step-by-step installation, access control, and base URL override.
 
-### 2. Positioning Engine (Docker)
+### 2. Standalone Demo (no PILOT required)
+
+To prove the full stack locally without PILOT, run the engine and open the built-in standalone frontend:
+
+```bash
+cd positioning-engine
+npm install
+node server.js
+```
+
+Then open **http://localhost:3080/** or **http://localhost:3080/standalone/** in your browser. You'll see a map, device list, and floor plan settings. Devices appear when BLE tags send data via MQTT, or when mock data is enabled (see `positioning-engine/` config). Add your floor plan image to `positioning-engine/plans/` or use the placeholder.
+
+### 3. Positioning Engine (Docker)
 
 ```bash
 cd positioning-engine
 docker-compose up -d
 ```
 
-This starts Mosquitto (MQTT broker) and the positioning engine. Configure `config.json` or environment variables before use.
+This starts Mosquitto (MQTT broker) and the positioning engine. Open **http://localhost:3080/** for the standalone demo. Configure `config.json` or environment variables before use.
 
-### 3. Configuration
+### 4. Configuration
 
 Edit `positioning-engine/config.json`:
 

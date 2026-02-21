@@ -60,6 +60,7 @@ You are deploying the **PILOT Indoor Positioning** full-stack system. This is an
      - `doc/index.html` (optional)
   2. In **PILOT Admin → Extensions (or Applications)**, register the extension with base URL: `/store/indoor-positioning/` or the full URL used above.
   3. **Load order** (if PILOT allows): `IndoorNavPanel.js` → `FloorPlanView.js` → `DeviceGrid.js` → `ZoneManager.js` → `AdminPanel.js` → `Module.js`, then `styles.css`.
+- **Access control (auth):** PILOT controls who sees the extension. In PILOT Admin → Extensions, assign the extension to the desired users or roles. Only users granted access will see it; no separate auth needed.
 - **Extension config:** `extension/config.json`
   - `settings.devicesApiUrl` — **Must point to the positioning engine devices API** for full-stack use, e.g. `http://ENGINE_HOST:3080/api/indoor/devices`. Replace `ENGINE_HOST` with the hostname or IP the browser can reach (e.g. the same server or a reachable internal host). If this is set, the extension also uses the same engine for **GET/PUT /api/indoor/floors** (load/save floor plan, calibration, anchors).
   - `settings.deviceRefreshInterval` — milliseconds (e.g. `5000`).
@@ -99,6 +100,14 @@ You are deploying the **PILOT Indoor Positioning** full-stack system. This is an
 6. Verify with `curl` and in PILOT (Indoor tab + Indoor Settings).
 
 If anything fails, check: Docker/Node and MQTT broker for the engine; nginx/paths and PILOT load order for the extension; and that `devicesApiUrl` is reachable from the browser and points to the correct engine host/port.
+
+### 6. Testing on PILOT Telematics
+
+1. Deploy engine on AWS (or same network as PILOT users).
+2. Host extension at `https://your-aws/store/indoor-positioning/` (or use PILOT server).
+3. In PILOT Admin → Extensions: add extension, set base URL, assign to test user/role.
+4. Set `extension/config.json` → `devicesApiUrl` to engine URL (e.g. `https://engine-host:3080/api/indoor/devices`). Use HTTPS if engine is behind TLS.
+5. Log in as a user with access; verify Indoor Positioning tab appears and loads devices/map.
 
 ## PROMPT END
 
