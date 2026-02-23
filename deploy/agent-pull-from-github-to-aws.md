@@ -1,50 +1,62 @@
-# Agent: Pull from GitHub and deploy to AWS EC2
+# Agent: Clean deploy v4.0 from GitHub to AWS EC2
 
 **Repo:** https://github.com/PrimeTurkmen/pilot-indoor (branch: `main`)
 
-Run these commands **on the EC2 instance** (e.g. via SSH or your MCP/agent that has shell access to the instance).
+Run these commands **on the EC2 instance**.
 
-## One-time: clone repo (if not already there)
+## Clean install (remove old, deploy new)
 
 ```bash
+# Stop old engine
+sudo systemctl stop pilot-indoor-engine 2>/dev/null || true
+
+# Remove everything old
+sudo rm -rf /var/www/store/indoor-positioning
+sudo rm -rf /home/ubuntu/pilot-indoor
+
+# Clone fresh
 cd /home/ubuntu
-if [ ! -d pilot-indoor ]; then
-  git clone https://github.com/PrimeTurkmen/pilot-indoor.git
-fi
+git clone https://github.com/PrimeTurkmen/pilot-indoor.git
+
+# Deploy extension to nginx
+sudo mkdir -p /var/www/store/indoor-positioning
+sudo cp -r /home/ubuntu/pilot-indoor/extension/* /var/www/store/indoor-positioning/
+sudo chown -R www-data:www-data /var/www/store/indoor-positioning
+
+# Install engine dependencies
+cd /home/ubuntu/pilot-indoor/positioning-engine
+npm install --production
+
+# Restart engine + nginx
+sudo systemctl restart pilot-indoor-engine
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-## Every time: pull latest and deploy extension
+## Update only (pull latest and redeploy)
 
 ```bash
 cd /home/ubuntu/pilot-indoor
 git fetch origin
-git pull origin main
+git reset --hard origin/main
 
+# Redeploy extension
 sudo cp -r extension/* /var/www/store/indoor-positioning/
 sudo chown -R www-data:www-data /var/www/store/indoor-positioning
-```
 
-## Optional: ensure config.json exists
+# Reinstall engine deps if package.json changed
+cd positioning-engine && npm install --production
 
-If the server copy is missing `config.json`:
-
-```bash
-echo '{"appName":"Indoor Positioning","version":"1.0.0","description":"Indoor people and asset tracking with BLE 6.0 Channel Sounding for PILOT Telematics","loadOrder":["IndoorNavPanel.js","FloorPlanView.js","DeviceGrid.js","ZoneManager.js","AdminPanel.js","Module.js"],"styles":"styles.css","settings":{"devicesApiUrl":"","defaultFloorPlanBounds":[[0,0],[1000,800]],"deviceRefreshInterval":5000}}' | sudo tee /var/www/store/indoor-positioning/config.json > /dev/null
-sudo chown www-data:www-data /var/www/store/indoor-positioning/config.json
-```
-
-## Optional: reload nginx (only if you changed nginx config)
-
-```bash
+# Restart
+sudo systemctl restart pilot-indoor-engine
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
----
-
-**Summary for the agent:** On the EC2 instance, run:
+## Verify
 
 ```bash
-cd /home/ubuntu/pilot-indoor && git fetch origin && git reset --hard origin/main && sudo cp -r extension/* /var/www/store/indoor-positioning/ && sudo chown -R www-data:www-data /var/www/store/indoor-positioning
+curl -s http://localhost:3080/api/velavu/status
+curl -s -o /dev/null -w "%{http_code}" http://localhost/store/indoor-positioning/Module.js
+curl -s -o /dev/null -w "%{http_code}" http://localhost/api/velavu/devices
 ```
 
-(`reset --hard` keeps the server in sync with GitHub even if there are local changes.)
+All should return `200` with data.

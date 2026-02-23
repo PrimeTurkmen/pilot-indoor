@@ -1,7 +1,7 @@
 {
   "name": "pilot-indoor-positioning-engine",
-  "version": "3.0.0",
-  "description": "ELA/Wirepas mesh + Channel Sounding — Production-grade indoor positioning (ported from SiteTrack)",
+  "version": "4.0.0",
+  "description": "Dual-engine indoor positioning: Velavu Cloud + BLE Channel Sounding for PILOT Telematics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
