@@ -78,7 +78,7 @@ Ext.define('Store.indoor-positioning.IndoorNavPanel', {
         me.store = Ext.create('Ext.data.TreeStore', {
             root: {
                 expanded: true,
-                children: me.getSampleHierarchy()
+                children: []
             }
         });
 
@@ -91,32 +91,65 @@ Ext.define('Store.indoor-positioning.IndoorNavPanel', {
     },
 
     /**
-     * Sample hierarchy for development. Replace with API data.
+     * Build hierarchy from device store data grouped by floor and zone.
+     * Returns empty tree if no devices loaded yet.
      */
-    getSampleHierarchy: function () {
-        return [
-            {
-                text: (typeof l === 'function') ? l('Building A') : 'Building A',
-                expanded: true,
-                children: [
-                    {
-                        text: (typeof l === 'function') ? l('Floor 1') : 'Floor 1',
-                        expanded: true,
-                        children: [
-                            {
-                                text: (typeof l === 'function') ? l('Zone A1') : 'Zone A1',
-                                expanded: true,
-                                children: [
-                                    { text: 'Worker_01', leaf: true, x: 150, y: 200, status: 'online', battery: 85, type: 'person' },
-                                    { text: 'Asset_T01', leaf: true, x: 300, y: 250, status: 'online', battery: 92, type: 'asset' },
-                                    { text: 'Worker_02', leaf: true, x: 180, y: 350, status: 'offline', battery: 15, type: 'person' }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+    buildHierarchy: function (devices) {
+        if (!devices || !devices.length) return [];
+        var floors = {};
+        for (var i = 0; i < devices.length; i++) {
+            var d = devices[i];
+            var floorKey = d.get ? d.get('floor') : d.floor;
+            var zoneName = (d.get ? d.get('zone') : d.zone) || ((typeof l === 'function') ? l('Unassigned') : 'Unassigned');
+            floorKey = floorKey || 1;
+            if (!floors[floorKey]) floors[floorKey] = {};
+            if (!floors[floorKey][zoneName]) floors[floorKey][zoneName] = [];
+            floors[floorKey][zoneName].push({
+                text: (d.get ? d.get('name') : d.name) || (d.get ? d.get('id') : d.id) || 'Unknown',
+                leaf: true,
+                x: d.get ? d.get('x') : d.x,
+                y: d.get ? d.get('y') : d.y,
+                status: d.get ? d.get('status') : d.status,
+                battery: d.get ? d.get('battery') : d.battery,
+                type: d.get ? d.get('type') : d.type
+            });
+        }
+        var tree = [];
+        var floorKeys = Object.keys(floors).sort();
+        for (var fi = 0; fi < floorKeys.length; fi++) {
+            var fk = floorKeys[fi];
+            var zones = floors[fk];
+            var zoneNodes = [];
+            var zoneNames = Object.keys(zones).sort();
+            for (var zi = 0; zi < zoneNames.length; zi++) {
+                zoneNodes.push({ text: zoneNames[zi], expanded: true, children: zones[zoneNames[zi]] });
             }
-        ];
+            tree.push({
+                text: ((typeof l === 'function') ? l('Floor') : 'Floor') + ' ' + fk,
+                expanded: true,
+                children: zoneNodes
+            });
+        }
+        return tree;
+    },
+
+    /**
+     * Refresh the tree from a device store.
+     * Called by Module.js when device data changes.
+     */
+    refreshFromStore: function (store) {
+        var me = this;
+        if (!store) return;
+        var records = store.getData ? store.getData().getRange() : [];
+        var children = me.buildHierarchy(records);
+        var root = me.getRootNode();
+        if (root) {
+            root.removeAll();
+            if (children.length) {
+                root.appendChild(children);
+                root.expandChildren(true);
+            }
+        }
     },
 
     onSearchChange: function (field, value) {

@@ -1,7 +1,7 @@
 {
   "appName": "Indoor Positioning",
-  "version": "1.0.0",
-  "description": "Indoor people and asset tracking with BLE 6.0 Channel Sounding for PILOT Telematics",
+  "version": "2.0.0",
+  "description": "Indoor people and asset tracking with ELA Innovation / Wirepas mesh + BLE 6.0 Channel Sounding for PILOT Telematics",
   "loadOrder": [
     "IndoorNavPanel.js",
     "FloorPlanView.js",

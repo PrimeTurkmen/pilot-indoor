@@ -41,4 +41,10 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ---
 
-**Summary for the agent:** On the EC2 instance, run: `cd /home/ubuntu/pilot-indoor && git pull origin main && sudo cp -r extension/* /var/www/store/indoor-positioning/ && sudo chown -R www-data:www-data /var/www/store/indoor-positioning`
+**Summary for the agent:** On the EC2 instance, run:
+
+```bash
+cd /home/ubuntu/pilot-indoor && git fetch origin && git reset --hard origin/main && sudo cp -r extension/* /var/www/store/indoor-positioning/ && sudo chown -R www-data:www-data /var/www/store/indoor-positioning
+```
+
+(`reset --hard` keeps the server in sync with GitHub even if there are local changes.)

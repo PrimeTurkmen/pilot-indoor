@@ -383,14 +383,16 @@ const apiServer = http.createServer(async (req, res) => {
 });
 
 apiServer.listen(API_PORT, () => {
-    console.log(`\n╔══════════════════════════════════════════════════╗`);
-    console.log(`║   PILOT Indoor Positioning Engine v2.0           ║`);
-    console.log(`║   ELA / Wirepas / Channel Sounding               ║`);
-    console.log(`╠══════════════════════════════════════════════════╣`);
-    console.log(`║   API:    http://0.0.0.0:${API_PORT}/api/indoor/devices  ║`);
-    console.log(`║   Stats:  http://0.0.0.0:${API_PORT}/api/indoor/stats    ║`);
-    console.log(`║   MQTT:   ${MQTT_BROKER.substring(0, 38).padEnd(38)} ║`);
-    console.log(`╚══════════════════════════════════════════════════╝\n`);
+    const W = 48; // inner width of banner
+    const pad = (s) => `║  ${s.padEnd(W - 2)} ║`;
+    console.log(`\n╔${'═'.repeat(W)}╗`);
+    console.log(pad('PILOT Indoor Positioning Engine v2.0'));
+    console.log(pad('ELA / Wirepas / Channel Sounding'));
+    console.log(`╠${'═'.repeat(W)}╣`);
+    console.log(pad(`API:   http://0.0.0.0:${API_PORT}/api/indoor/devices`));
+    console.log(pad(`Stats: http://0.0.0.0:${API_PORT}/api/indoor/stats`));
+    console.log(pad(`MQTT:  ${MQTT_BROKER}`));
+    console.log(`╚${'═'.repeat(W)}╝\n`);
 });
 
 // ─── MQTT ────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 {
   "name": "pilot-indoor-positioning-engine",
-  "version": "1.0.0",
-  "description": "MQTT → Trilateration → Pilot API V3 for indoor BLE positioning",
+  "version": "2.0.0",
+  "description": "ELA/Wirepas mesh + Channel Sounding → Trilateration → Kalman → Pilot API V3",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -66,8 +66,7 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
                     if (floors.length) {
                         var f = floors[0];
                         var url = f.plan_url;
-                        var b = f.bounds || (f.calibration && f.calibration.points && f.calibration.points.length >= 3) ?
-                            [[0, 0], [1000, 800]] : me.floorPlanBounds;
+                        var b = f.bounds ? f.bounds : me.floorPlanBounds;
                         if (Array.isArray(b[0]) && Array.isArray(b[1])) {
                             b = [[b[0][1], b[0][0]], [b[1][1], b[1][0]]];
                         }

@@ -1,7 +1,7 @@
 # PILOT Indoor Positioning
 
-> Full-stack open source indoor positioning system for PILOT Telematics platform  
-> using Bluetooth 6.0 Channel Sounding on nRF54L15
+> Full-stack indoor positioning extension for PILOT Telematics platform
+> ELA Innovation / Wirepas mesh + BLE 6.0 Channel Sounding
 
 **License:** Apache 2.0 · **Author:** TAQEEQ Systems ([pilot-gps.com](https://pilot-gps.com))  
 **Target:** Indoor worker/asset tracking for construction sites in Turkmenistan & UAE
@@ -12,19 +12,19 @@
 
 ## Project Overview
 
-PILOT Indoor Positioning enables tracking of people and assets inside buildings with ±1 m accuracy using Bluetooth 6.0 Channel Sounding on Nordic nRF54L15 chips. The system consists of three layers: firmware on tags/anchors/gateway, a Node.js positioning engine, and a PILOT Extension for visualization.
+PILOT Indoor Positioning enables tracking of people and assets inside buildings with ±1 m accuracy using ELA Innovation BLE devices on Wirepas mesh with Channel Sounding support. The system consists of three layers: ELA hardware (tags/anchors/gateway), a Node.js positioning engine, and a PILOT Extension for visualization.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 1: FIRMWARE (Zephyr / nRF Connect SDK v3.0.1)             │
-│  nRF54L15 tags (Reflector) → Anchors (Initiator) → Gateway       │
+│  LAYER 1: HARDWARE (ELA Innovation / Wirepas mesh)               │
+│  Blue PUCK tags → Blue ANCHOR → SolidSense N6 Gateway            │
 │  Gateway publishes distances to MQTT                              │
 ├─────────────────────────────────────────────────────────────────┤
-│  LAYER 2: POSITIONING ENGINE (Node.js / Docker)                  │
-│  MQTT ← distances → Trilateration → Kalman → Pilot API V3        │
-│  Stack: Node.js 20, mqtt, mathjs, node-fetch                     │
+│  LAYER 2: POSITIONING ENGINE v2.0 (Node.js / Docker)             │
+│  MQTT ← WNT/ELA/generic → Trilateration → Kalman → Pilot API    │
+│  Channel Sounding + RSSI fallback, adaptive update rate           │
 ├─────────────────────────────────────────────────────────────────┤
 │  LAYER 3: PILOT EXTENSION (Ext JS 7.7+, Leaflet)                 │
 │  Floor plan overlay, tag markers, geozones, DeviceGrid           │
@@ -84,13 +84,14 @@ Edit `positioning-engine/config.json`:
 
 Environment variables override config: `MQTT_BROKER`, `PILOT_API_URL`, `PILOT_API_KEY`, `API_PORT`.
 
-## Hardware Requirements
+## Hardware (ELA Innovation)
 
 | Component | Hardware |
 |-----------|----------|
-| Tags      | MOKOSMART L03 (nRF54L15, BLE 6.0, 10+ year battery) |
-| Anchors   | MOKOSMART L03 or nRF54L15 DK |
-| Gateway   | nRF54L15 DK + Ethernet/WiFi bridge |
+| Tags (people) | ELA Blue PUCK RHT (temp/humidity), Blue PUCK MOV (motion) |
+| Tags (assets) | ELA Blue COIN ID |
+| Anchors   | ELA Blue ANCHOR (fixed reference, Channel Sounding) |
+| Gateway   | SolidSense N6 (Wirepas mesh gateway) |
 | MQTT      | Mosquitto or any MQTT 3.1.1 broker |
 
 ---
@@ -99,19 +100,19 @@ Environment variables override config: `MQTT_BROKER`, `PILOT_API_URL`, `PILOT_AP
 
 ## Обзор проекта
 
-PILOT Indoor Positioning позволяет отслеживать людей и активы внутри зданий с точностью ±1 м с использованием Bluetooth 6.0 Channel Sounding на чипах Nordic nRF54L15. Система состоит из трёх уровней: прошивка на тэгах/якорях/шлюзе, Node.js движок позиционирования и PILOT Extension для визуализации.
+PILOT Indoor Positioning позволяет отслеживать людей и активы внутри зданий с точностью ±1 м с использованием устройств ELA Innovation на Wirepas mesh с поддержкой Channel Sounding. Система состоит из трёх уровней: оборудование ELA (тэги/якоря/шлюз), Node.js движок позиционирования и PILOT Extension для визуализации.
 
 ## Архитектура
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  УРОВЕНЬ 1: ПРОШИВКА (Zephyr / nRF Connect SDK v3.0.1)           │
-│  nRF54L15 тэги (Reflector) → Якоря (Initiator) → Шлюз            │
+│  УРОВЕНЬ 1: ОБОРУДОВАНИЕ (ELA Innovation / Wirepas mesh)         │
+│  Blue PUCK тэги → Blue ANCHOR якоря → SolidSense N6 шлюз         │
 │  Шлюз публикует дистанции в MQTT                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  УРОВЕНЬ 2: POSITIONING ENGINE (Node.js / Docker)                │
-│  MQTT ← дистанции → Трилатерация → Калман → Pilot API V3         │
-│  Стек: Node.js 20, mqtt, mathjs, node-fetch                      │
+│  УРОВЕНЬ 2: POSITIONING ENGINE v2.0 (Node.js / Docker)           │
+│  MQTT ← WNT/ELA/generic → Трилатерация → Калман → Pilot API     │
+│  Channel Sounding + RSSI fallback, адаптивный rate обновлений     │
 ├─────────────────────────────────────────────────────────────────┤
 │  УРОВЕНЬ 3: PILOT EXTENSION (Ext JS 7.7+, Leaflet)               │
 │  План этажа, маркеры тэгов, геозоны, DeviceGrid                  │
@@ -153,11 +154,12 @@ docker-compose up -d
 
 Переменные окружения переопределяют config: `MQTT_BROKER`, `PILOT_API_URL`, `PILOT_API_KEY`.
 
-## Требования к оборудованию
+## Оборудование (ELA Innovation)
 
 | Компонент | Оборудование |
 |-----------|--------------|
-| Тэги      | MOKOSMART L03 (nRF54L15, BLE 6.0, батарея 10+ лет) |
-| Якоря     | MOKOSMART L03 или nRF54L15 DK |
-| Шлюз      | nRF54L15 DK + Ethernet/WiFi мост |
+| Тэги (люди) | ELA Blue PUCK RHT (темп./влажность), Blue PUCK MOV (движение) |
+| Тэги (активы) | ELA Blue COIN ID |
+| Якоря     | ELA Blue ANCHOR (стационарные, Channel Sounding) |
+| Шлюз      | SolidSense N6 (Wirepas mesh шлюз) |
 | MQTT      | Mosquitto или любой брокер MQTT 3.1.1 |

@@ -12,5 +12,14 @@ tmp/
 .env
 .env.local
 
-# Reference repo (add as submodule if needed)
+# Reference repos
 pilot_extensions/
+sdk-nrf/
+
+# Nested repos / dev clones
+sitetrack/
+pilot-indoor/
+pilot-indoor-1/
+
+# Claude worktrees
+.claude/

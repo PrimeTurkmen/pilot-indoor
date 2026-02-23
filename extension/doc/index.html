@@ -19,19 +19,20 @@
 
     <div class="section">
         <h2>Purpose</h2>
-        <p>Tracks people and assets inside buildings with ±1m accuracy using Bluetooth 6.0 Channel Sounding (nRF54L15).</p>
+        <p>Tracks people and assets inside buildings with ±1m accuracy using ELA Innovation BLE devices on Wirepas mesh with Channel Sounding support.</p>
         <ul>
             <li>Floor plan overlay on Leaflet map (CRS.Simple)</li>
-            <li>Real-time tag markers via Pilot API V3</li>
-            <li>Buildings → Floors → Zones navigation</li>
-            <li>Geozones, movement trails, heatmaps</li>
+            <li>Real-time tag markers via Positioning Engine API</li>
+            <li>Floor → Zone → Device navigation tree</li>
+            <li>Geozones with enter/exit alerts</li>
+            <li>ELA sensor data: temperature, humidity, motion, battery</li>
         </ul>
     </div>
 
     <div class="section">
         <h2>Data Sources</h2>
-        <p><strong>Pilot API V3</strong> — device positions, units. Positioning Engine publishes computed positions via API.</p>
-        <p><strong>MQTT</strong> — Positioning Engine subscribes to <code>pilot/indoor/distances/+</code> from gateways.</p>
+        <p><strong>Positioning Engine</strong> — computes positions from anchor distances, publishes to Pilot API V3 and serves device data to the extension.</p>
+        <p><strong>MQTT topics</strong> — Engine subscribes to: <code>pilot/indoor/distances/+</code> (generic BLE), <code>wirepas/+/received_data</code> (ELA/Wirepas WNT), <code>ela/+/data</code> (ELA proprietary).</p>
     </div>
 
     <div class="section">

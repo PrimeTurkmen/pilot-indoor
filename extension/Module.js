@@ -1,7 +1,8 @@
 /**
  * PILOT Extension — Indoor Positioning
  * Entry point for the Indoor Positioning module.
- * Tracks people and assets indoors using BLE 6.0 Channel Sounding.
+ * Tracks people and assets indoors using ELA Innovation / Wirepas mesh
+ * with BLE 6.0 Channel Sounding support.
  *
  * @see pilot_extensions/AI_SPECS.md
  * @see pilot_extensions/examples/template-app
@@ -121,6 +122,10 @@ Ext.define('Store.indoor-positioning.Module', {
                 }
             }
         }, me, { single: true });
+
+        // 8. Sync nav panel tree with device store (Floor → Zone → Device hierarchy)
+        deviceStore.on('load', function () { navTab.refreshFromStore(deviceStore); });
+        deviceStore.on('datachanged', function () { navTab.refreshFromStore(deviceStore); });
     },
 
     loadStyles: function () {

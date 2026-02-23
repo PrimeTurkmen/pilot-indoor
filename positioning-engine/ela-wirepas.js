@@ -165,7 +165,7 @@ function parseELA(payload) {
                     anchor_id: anchorId,
                     distance_m: distance,
                     quality: b.quality || 0.9,
-                    method: distance != null ? 'cs' : 'rssi'
+                    method: 'cs'
                 });
             } else if (rssi != null) {
                 const txPower = b.tx_power || -59;
