@@ -1,20 +1,39 @@
-# Example nginx config to serve the Indoor Positioning extension.
-# Copy this into your nginx server block (e.g. on AWS) so PILOT stops getting 404.
-#
-# 1. Copy the whole repo "extension/" folder to the server, e.g.:
-#    /var/www/store/indoor-positioning/
-# 2. Include this snippet in the server { } that serves pilot-gps.com (or your domain).
-# 3. Reload nginx: sudo nginx -s reload
+# PILOT Indoor Positioning v4.0 — nginx config
+# Add these location blocks to your server { } block
+# Then: sudo nginx -t && sudo systemctl reload nginx
 
+# Extension static files
 location /store/indoor-positioning/ {
     alias /var/www/store/indoor-positioning/;
     default_type application/javascript;
-    location ~ \.json$ {
-        default_type application/json;
-    }
-    location ~ \.css$ {
-        default_type text/css;
-    }
-    add_header Cache-Control "public, max-age=300";
+    location ~ \.json$ { default_type application/json; }
+    location ~ \.css$ { default_type text/css; }
+    add_header Cache-Control "public, max-age=60";
     add_header Access-Control-Allow-Origin "*";
+}
+
+# Velavu API proxy (primary engine)
+location /api/velavu/ {
+    proxy_pass http://127.0.0.1:3080;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+
+# Channel Sounding API proxy (secondary engine)
+location /api/indoor/ {
+    proxy_pass http://127.0.0.1:3080;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+
+# WebSocket for real-time device updates
+location /ws {
+    proxy_pass http://127.0.0.1:3080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_read_timeout 86400;
 }

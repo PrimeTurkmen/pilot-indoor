@@ -28,6 +28,7 @@ const { DeviceCache } = require('./device-cache');
 const { ZoneChecker } = require('./zone-checker');
 const { AlertEvaluator } = require('./alert-evaluator');
 const { WebSocketBroadcaster } = require('./websocket');
+const velavuAdapter = require('./velavu-adapter');
 
 // ─── Config ──────────────────────────────────────────────────────────
 const configPath = path.join(__dirname, 'config.json');
@@ -454,6 +455,11 @@ const apiServer = http.createServer(async (req, res) => {
         }
     }
 
+    // Velavu adapter routes
+    if (url.startsWith('/api/velavu/')) {
+        return velavuAdapter.handleRequest(req, res);
+    }
+
     res.writeHead(404);
     res.end();
 });
@@ -463,7 +469,7 @@ apiServer.listen(API_PORT, () => {
     const pad = (s) => `║  ${s.padEnd(W - 2)} ║`;
     console.log(`\n╔${'═'.repeat(W)}╗`);
     console.log(pad('PILOT Indoor Positioning Engine v3.0'));
-    console.log(pad('ELA / Wirepas / Channel Sounding'));
+    console.log(pad('Dual Engine: Velavu Cloud + Channel Sounding'));
     console.log(pad('Ported from SiteTrack — Production Grade'));
     console.log(`╠${'═'.repeat(W)}╣`);
     console.log(pad(`API:       http://0.0.0.0:${API_PORT}/api/indoor/devices`));
@@ -473,13 +479,30 @@ apiServer.listen(API_PORT, () => {
     console.log(pad(`Gateways:  http://0.0.0.0:${API_PORT}/api/indoor/gateways`));
     console.log(pad(`WebSocket: ws://0.0.0.0:${API_PORT}`));
     console.log(pad(`MQTT:      ${MQTT_BROKER}`));
+    console.log(pad(`Velavu:    ${process.env.VELAVU_API_TOKEN ? 'enabled' : 'disabled (no token)'}`));
     console.log(`╚${'═'.repeat(W)}╝\n`);
 });
 
 // Attach WebSocket to HTTP server
 if (wsConfig.enabled !== false) {
     wsBroadcaster.attach(apiServer, wsConfig.heartbeat_interval || 30000);
+
+    // Wire Velavu WebSocket subscribers
+    wsBroadcaster.on('connection', (ws) => {
+        ws.on('message', (msg) => {
+            try {
+                const parsed = JSON.parse(msg);
+                if (parsed.type === 'subscribe' && Array.isArray(parsed.channels) && parsed.channels.includes('velavu')) {
+                    velavuAdapter.addSubscriber(ws);
+                    ws.on('close', () => velavuAdapter.removeSubscriber(ws));
+                }
+            } catch (e) { /* ignore non-JSON */ }
+        });
+    });
 }
+
+// Start Velavu adapter
+velavuAdapter.start();
 
 // ─── MQTT ────────────────────────────────────────────────────────────
 const allTopics = getMqttTopics(config.mqtt.topics);

@@ -1,9 +1,30 @@
 version: "3.8"
 
 services:
+  positioning-engine:
+    build: .
+    container_name: pilot-indoor-engine
+    restart: unless-stopped
+    ports:
+      - "3080:3080"
+    environment:
+      # Velavu Cloud Engine (primary) — set your token here
+      VELAVU_API_TOKEN: ${VELAVU_API_TOKEN:-}
+      VELAVU_API_URL: ${VELAVU_API_URL:-https://api.velavu.com}
+      VELAVU_POLL_MS: ${VELAVU_POLL_MS:-10000}
+      # Channel Sounding Engine (secondary)
+      MQTT_BROKER: mqtt://mosquitto:1883
+      # PILOT bridge
+      PILOT_API_URL: ${PILOT_API_URL:-https://your-server.pilot-gps.com}
+      PILOT_API_KEY: ${PILOT_API_KEY:-}
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: pilot-indoor-mosquitto
+    restart: unless-stopped
     ports:
       - "1883:1883"
     volumes:
@@ -15,23 +36,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-
-  positioning-engine:
-    build: .
-    container_name: pilot-indoor-engine
-    ports:
-      - "3080:3080"
-    depends_on:
-      mosquitto:
-        condition: service_healthy
-    environment:
-      MQTT_BROKER: mqtt://mosquitto:1883
-      PILOT_API_URL: ${PILOT_API_URL:-https://your-server.pilot-gps.com}
-      PILOT_API_KEY: ${PILOT_API_KEY:-}
-      MOCK_DATA: "true"
-    volumes:
-      - ./config.json:/app/config.json:ro
-      - ./plans:/app/plans
 
 volumes:
   mosquitto_data:
