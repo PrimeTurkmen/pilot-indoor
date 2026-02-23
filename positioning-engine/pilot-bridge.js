@@ -5,7 +5,7 @@
  * @see TECHNICAL_SPEC.md — pilot-bridge.js requirements
  */
 
-const fetch = require('node-fetch');
+// Node 20+ has built-in fetch — no external dependency needed
 
 /**
  * Build affine transform matrix from 3 calibration points.

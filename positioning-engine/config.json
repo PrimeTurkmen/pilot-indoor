@@ -6,7 +6,10 @@
     "topics": {
       "distances": "pilot/indoor/distances/+",
       "wirepas": "wirepas/+/received_data",
-      "ela": "ela/+/data"
+      "ela": "ela/+/data",
+      "protobuf": "gw-event/received_data/#",
+      "gatewayStatus": "gw-event/status/+",
+      "nodeStatus": "wirepas/status/+"
     }
   },
   "pilot": {
@@ -24,6 +27,35 @@
       "min_confidence": 0.6
     }
   },
+  "zones": [
+    {
+      "id": "zone-loading",
+      "name": "Loading Bay",
+      "floor": 1,
+      "type": "restricted",
+      "polygon": [[0, 0], [8, 0], [8, 5], [0, 5]]
+    },
+    {
+      "id": "zone-office",
+      "name": "Office Area",
+      "floor": 1,
+      "type": "general",
+      "polygon": [[15, 10], [20, 10], [20, 15], [15, 15]]
+    }
+  ],
+  "alerts": {
+    "enabled": true,
+    "cooldown_seconds": 300,
+    "battery_warning": 15,
+    "battery_critical": 5,
+    "offline_timeout_seconds": 600,
+    "speed_limit_kmh": 40
+  },
+  "websocket": {
+    "enabled": true,
+    "heartbeat_interval": 30000,
+    "stats_interval": 10000
+  },
   "tag_mappings": [],
   "floors": [
     {
@@ -32,57 +64,15 @@
       "plan_url": "/plans/placeholder.svg",
       "calibration": {
         "points": [
-          {
-            "pixel": [
-              0,
-              0
-            ],
-            "geo": [
-              25.2048,
-              55.2708
-            ]
-          },
-          {
-            "pixel": [
-              1000,
-              0
-            ],
-            "geo": [
-              25.2048,
-              55.2718
-            ]
-          },
-          {
-            "pixel": [
-              0,
-              800
-            ],
-            "geo": [
-              25.2055,
-              55.2708
-            ]
-          }
+          { "pixel": [0, 0], "geo": [25.2048, 55.2708] },
+          { "pixel": [1000, 0], "geo": [25.2048, 55.2718] },
+          { "pixel": [0, 800], "geo": [25.2055, 55.2708] }
         ]
       },
       "anchors": [
-        {
-          "id": "anchor_01",
-          "x": 0,
-          "y": 0,
-          "z": 2.5
-        },
-        {
-          "id": "anchor_02",
-          "x": 20,
-          "y": 0,
-          "z": 2.5
-        },
-        {
-          "id": "anchor_03",
-          "x": 10,
-          "y": 15,
-          "z": 2.5
-        }
+        { "id": "anchor_01", "x": 0, "y": 0, "z": 2.5 },
+        { "id": "anchor_02", "x": 20, "y": 0, "z": 2.5 },
+        { "id": "anchor_03", "x": 10, "y": 15, "z": 2.5 }
       ]
     }
   ],

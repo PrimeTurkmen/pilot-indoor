@@ -90,6 +90,15 @@ function createKalmanFilter(opts = {}) {
             return state ? { x: state[0], y: state[1], vx: state[2], vy: state[3] } : null;
         },
 
+        /**
+         * Get speed from Kalman state (more accurate than position-history calculation).
+         * @returns {number} speed in m/s (or 0 if no state)
+         */
+        getSpeed() {
+            if (!state) return 0;
+            return Math.sqrt(state[2] * state[2] + state[3] * state[3]);
+        },
+
         reset() {
             state = null;
             P = null;

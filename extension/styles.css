@@ -260,6 +260,93 @@
 .indoor-device-grid .indoor-offline { color: var(--indoor-offline); }
 .indoor-device-grid .indoor-low-battery { color: var(--indoor-low-battery); }
 
+/* ---- Zone overlays on floor plan (v3.0) ---- */
+.indoor-zone-restricted {
+    animation: indoor-zone-pulse 2s ease-in-out infinite;
+}
+@keyframes indoor-zone-pulse {
+    0%, 100% { stroke-opacity: 0.8; }
+    50% { stroke-opacity: 0.4; }
+}
+.indoor-zone-tooltip {
+    font-size: 12px;
+    background: var(--indoor-bg-panel);
+    border: 1px solid var(--indoor-border);
+    border-radius: var(--indoor-radius-sm);
+    box-shadow: var(--indoor-shadow-lg);
+    padding: 6px 10px;
+    color: var(--indoor-text);
+}
+
+/* ---- Device marker animations (v3.0) ---- */
+.indoor-marker-restricted {
+    animation: indoor-marker-pulse-red 1.5s ease-in-out infinite;
+}
+@keyframes indoor-marker-pulse-red {
+    0%, 100% { stroke-width: 2; stroke: #fff; }
+    50% { stroke-width: 4; stroke: #ef4444; }
+}
+.indoor-marker-online {
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+.indoor-marker-offline {
+    opacity: 0.6;
+}
+
+/* ---- Zone badges in DeviceGrid (v3.0) ---- */
+.indoor-zone-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--indoor-accent-soft);
+    color: var(--indoor-accent-hover);
+}
+.indoor-zone-badge-restricted {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* ---- Alert icon in DeviceGrid (v3.0) ---- */
+.indoor-alert-icon {
+    font-size: 14px;
+    cursor: help;
+}
+
+/* ---- WebSocket status indicator (v3.0) ---- */
+.indoor-ws-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.indoor-ws-connected {
+    background: var(--indoor-online);
+    box-shadow: 0 0 4px var(--indoor-online);
+}
+.indoor-ws-polling {
+    background: var(--indoor-low-battery);
+    animation: indoor-ws-blink 2s ease-in-out infinite;
+}
+@keyframes indoor-ws-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ---- Alert toast styles (v3.0) ---- */
+.indoor-alert-critical {
+    border-left: 4px solid #ef4444 !important;
+    background: #fef2f2 !important;
+}
+.indoor-alert-warning {
+    border-left: 4px solid #f59e0b !important;
+    background: #fffbeb !important;
+}
+
 /* ---- Legacy / fallback ---- */
 .indoor-nav-placeholder {
     font-size: 13px;
