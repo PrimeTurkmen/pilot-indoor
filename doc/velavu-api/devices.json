@@ -1,0 +1,1406 @@
+[
+    {
+        "id": "00Q64",
+        "serial_code": "dc-10-c6-0b-a1-c8",
+        "location": {
+            "coordinates": [
+                53.02541770000002,
+                40.004957999999995
+            ],
+            "timestamp": "2026-02-06T10:50:08+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:07:54+00:00",
+            "temperature_c": 24.7,
+            "humidity": 53.1
+        },
+        "heartbeat": "2026-02-23T16:09:22+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -53,
+                "install_quality": 100,
+                "device_id": "00Q83",
+                "tx_power": -4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q68",
+        "serial_code": "db-73-dc-1f-5b-b4",
+        "location": {
+            "coordinates": [
+                53.02528789999997,
+                40.00625010000001
+            ],
+            "timestamp": "2026-02-06T10:51:01+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:02:58+00:00",
+            "temperature_c": 3.4,
+            "humidity": 24.2
+        },
+        "heartbeat": "2026-02-23T16:25:46+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -61,
+                "install_quality": 100,
+                "device_id": "00Q7P",
+                "tx_power": 4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 97
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q6N",
+        "serial_code": "ea-c5-0f-c9-63-52",
+        "location": {
+            "coordinates": [
+                53.014320999999995,
+                40.0035474
+            ],
+            "timestamp": "2026-02-06T10:57:28+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:14:24+00:00",
+            "temperature_c": 24.7,
+            "humidity": 53.5
+        },
+        "heartbeat": "2026-02-23T16:08:37+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -52,
+                "install_quality": 100,
+                "device_id": "00Q73",
+                "tx_power": -4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 29
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q73",
+        "serial_code": "dc-71-84-86-80-6a",
+        "location": {
+            "coordinates": [
+                53.01564809999999,
+                40.00672089999999
+            ],
+            "timestamp": "2026-02-06T10:58:51+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:21:14+00:00",
+            "temperature_c": -7.3,
+            "humidity": 48.3
+        },
+        "heartbeat": "2026-02-23T16:08:35+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -61,
+                "install_quality": 100,
+                "device_id": "Sp8mv",
+                "tx_power": 4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 94
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q74",
+        "serial_code": "c2-bb-56-bd-87-f9",
+        "location": {
+            "coordinates": [
+                53.03521610000005,
+                40.00691849999997
+            ],
+            "timestamp": "2026-02-06T11:53:29+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:10:11+00:00",
+            "temperature_c": 24.4,
+            "humidity": 52.6
+        },
+        "heartbeat": "2026-02-23T16:09:39+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -61,
+                "install_quality": 100,
+                "device_id": "00Q8Y",
+                "tx_power": 0
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q79",
+        "serial_code": "f8-16-29-87-b5-a1",
+        "location": {
+            "coordinates": [
+                53.04914900000003,
+                40.008090899999964
+            ],
+            "timestamp": "2026-02-06T11:52:36+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:14:02+00:00",
+            "temperature_c": 24.9,
+            "humidity": 52.3
+        },
+        "heartbeat": "2026-02-23T16:09:06+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -55,
+                "install_quality": 100,
+                "device_id": "00Q83",
+                "tx_power": 0
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q7P",
+        "serial_code": "ea-65-87-60-85-66",
+        "location": {
+            "coordinates": [
+                53.03013199999998,
+                40.00419800000002
+            ],
+            "timestamp": "2026-02-06T11:56:18+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:28:26+00:00",
+            "temperature_c": 24.4,
+            "humidity": 52.9
+        },
+        "heartbeat": "2026-02-23T16:06:26+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -49,
+                "install_quality": 100,
+                "device_id": "00Q74",
+                "tx_power": -8
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q82",
+        "serial_code": "c0-83-e3-85-a8-3f",
+        "location": {
+            "coordinates": [
+                53.04741120000003,
+                40.004268599999996
+            ],
+            "timestamp": "2026-02-06T11:54:12+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:10:13+00:00",
+            "temperature_c": 24.4,
+            "humidity": 49.3
+        },
+        "heartbeat": "2026-02-23T16:20:33+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -57,
+                "install_quality": 100,
+                "device_id": "00Q73",
+                "tx_power": 4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q83",
+        "serial_code": "e1-e9-ba-bf-22-f1",
+        "location": {
+            "coordinates": [
+                53.04254810000001,
+                40.0031343
+            ],
+            "timestamp": "2026-02-06T11:51:58+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:05:14+00:00",
+            "temperature_c": 24.8,
+            "humidity": 51.9
+        },
+        "heartbeat": "2026-02-23T16:09:39+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -49,
+                "install_quality": 100,
+                "device_id": "00Q8Y",
+                "tx_power": -8
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8B",
+        "serial_code": "d0-84-29-9c-94-41",
+        "location": {
+            "coordinates": [
+                53.01854340000003,
+                40.00256180000002
+            ],
+            "timestamp": "2026-02-06T11:55:00+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:02:02+00:00",
+            "temperature_c": 24.6,
+            "humidity": 49.3
+        },
+        "heartbeat": "2026-02-23T16:09:06+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -49,
+                "install_quality": 100,
+                "device_id": "00Q83",
+                "tx_power": -8
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8E",
+        "serial_code": "f1-6d-9d-49-0d-e5",
+        "location": {
+            "coordinates": [
+                53.03476729999997,
+                40.00702050000002
+            ],
+            "timestamp": "2026-02-06T11:51:19+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:04:38+00:00",
+            "temperature_c": 24.6,
+            "humidity": 53.5
+        },
+        "heartbeat": "2026-02-23T16:19:05+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -62,
+                "install_quality": 100,
+                "device_id": "00Q73",
+                "tx_power": 8
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 99
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8K",
+        "serial_code": "df-7c-74-d0-87-d4",
+        "location": {
+            "coordinates": [
+                53.04915769999997,
+                40.008109399999974
+            ],
+            "timestamp": "2026-02-06T10:58:10+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:25:30+00:00",
+            "temperature_c": 25.8,
+            "humidity": 48.8
+        },
+        "heartbeat": "2026-02-23T16:09:14+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -55,
+                "install_quality": 100,
+                "device_id": "00Q8Y",
+                "tx_power": 0
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8Q",
+        "serial_code": "f4-b1-67-f3-6d-da",
+        "location": {
+            "coordinates": [
+                53.02466240000005,
+                40.00502449999999
+            ],
+            "timestamp": "2026-02-06T11:56:54+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:14:40+00:00",
+            "temperature_c": 25.2,
+            "humidity": 50.8
+        },
+        "heartbeat": "2026-02-23T16:09:17+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -57,
+                "install_quality": 100,
+                "device_id": "00Q82",
+                "tx_power": 0
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8R",
+        "serial_code": "f7-0f-ee-d7-5e-a0",
+        "location": {
+            "coordinates": [
+                53.02433500000001,
+                40.002280400000004
+            ],
+            "timestamp": "2026-02-06T10:55:18+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:31:07+00:00",
+            "temperature_c": 24.9,
+            "humidity": 51.9
+        },
+        "heartbeat": "2026-02-23T16:09:25+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -54,
+                "install_quality": 100,
+                "device_id": "00Q73",
+                "tx_power": 0
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "00Q8Y",
+        "serial_code": "da-6a-87-9e-2a-7b",
+        "location": {
+            "coordinates": [
+                53.026364400000006,
+                40.00628420000002
+            ],
+            "timestamp": "2026-02-06T10:54:24+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "environment": {
+            "timestamp": "2026-02-23T16:01:45+00:00",
+            "temperature_c": 25.3,
+            "humidity": 51.2
+        },
+        "heartbeat": "2026-02-23T16:09:23+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "env_sensor_rate_s": 1800,
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "low_latency_mode": false,
+                "role": "HEADNODE",
+                "ac_limit": "AC_8_SEC",
+                "participate_otap": true,
+                "routing_info": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": -55,
+                "install_quality": 100,
+                "device_id": "Sp8mv",
+                "tx_power": -4
+            },
+            "ble_app_version": "",
+            "power": {
+                "battery_level": 100
+            },
+            "app_version": "meridian-app_2.1.0_meridian-revB_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 0,
+                "processed_otap_crc": 255
+            },
+            "buzzer_on": false
+        },
+        "category": "ANCHOR",
+        "hardware": "meridian",
+        "model": "Pavo HD",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "3fHPC",
+        "serial_code": "e0-b3-cb-2c-76-9f",
+        "location": {
+            "coordinates": [
+                53.02124,
+                40.002991
+            ],
+            "timestamp": "2026-02-23T16:17:22+00:00",
+            "accuracy": 0.2,
+            "location_type": "MESH",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "heartbeat": "2026-02-23T16:09:24+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "role": "SUBNODE",
+                "participate_otap": true,
+                "routing_info": false
+            },
+            "positioning": {
+                "wpe_enabled": true,
+                "fixed_rate_s": 0,
+                "dynamic_rate_s": 30,
+                "dynamic_mode": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": 0,
+                "install_quality": 24,
+                "device_id": "RPI01",
+                "tx_power": 4
+            },
+            "power": {
+                "battery_level": 38,
+                "battery_charging": false,
+                "usb_power": false
+            },
+            "app_version": "minew-b10-app_1.2.0_minew-b10_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 34265,
+                "processed_otap_crc": 65535
+            }
+        },
+        "category": "TAG",
+        "hardware": "panicbutton",
+        "model": "Minew B10",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF",
+        "asset": {
+            "id": "xtkKOoCxYV",
+            "category": "EQUIPMENT",
+            "group": "Staff",
+            "name": "STAFF 01",
+            "notes": "",
+            "device_id": "3fHPC",
+            "online": true
+        }
+    },
+    {
+        "id": "KrWoN",
+        "serial_code": "ca-ad-bc-cc-d5-55",
+        "location": {
+            "coordinates": [
+                53.026226,
+                40.003101
+            ],
+            "timestamp": "2026-02-23T11:31:36+00:00",
+            "accuracy": 0.3,
+            "location_type": "MESH",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "heartbeat": "2026-02-23T16:25:46+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "role": "SUBNODE",
+                "participate_otap": true,
+                "routing_info": false
+            },
+            "positioning": {
+                "wpe_enabled": true,
+                "fixed_rate_s": 0,
+                "dynamic_rate_s": 30,
+                "dynamic_mode": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": 0,
+                "install_quality": 24,
+                "device_id": "RPI01",
+                "tx_power": 4
+            },
+            "power": {
+                "battery_level": 36,
+                "battery_charging": false,
+                "usb_power": false
+            },
+            "app_version": "minew-b10-app_1.2.0_minew-b10_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 34265,
+                "processed_otap_crc": 65535
+            }
+        },
+        "category": "TAG",
+        "hardware": "panicbutton",
+        "model": "Minew B10",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF",
+        "asset": {
+            "id": "ZcgOgUTpRm",
+            "category": "EQUIPMENT",
+            "group": "Staff",
+            "name": "STAFF 02",
+            "notes": "",
+            "device_id": "KrWoN",
+            "online": true
+        }
+    },
+    {
+        "id": "Pz6QG",
+        "serial_code": "e1-81-ba-83-3e-dd",
+        "location": {
+            "coordinates": [
+                53.034084,
+                40.00375
+            ],
+            "timestamp": "2026-02-18T06:28:08+00:00",
+            "accuracy": 0.7,
+            "location_type": "MESH",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "heartbeat": "2026-02-23T16:09:41+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "role": "SUBNODE",
+                "participate_otap": true,
+                "routing_info": false
+            },
+            "positioning": {
+                "wpe_enabled": true,
+                "fixed_rate_s": 0,
+                "dynamic_rate_s": 30,
+                "dynamic_mode": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": 0,
+                "install_quality": 24,
+                "device_id": "RPI01",
+                "tx_power": 4
+            },
+            "power": {
+                "battery_level": 55,
+                "battery_charging": false,
+                "usb_power": false
+            },
+            "app_version": "minew-b10-app_1.2.0_minew-b10_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 34265,
+                "processed_otap_crc": 65535
+            }
+        },
+        "category": "TAG",
+        "hardware": "panicbutton",
+        "model": "Minew B10",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF",
+        "asset": {
+            "id": "vznyRGpk0x",
+            "category": "EQUIPMENT",
+            "group": "Staff",
+            "name": "STAFF 04",
+            "notes": "",
+            "device_id": "Pz6QG",
+            "online": true
+        }
+    },
+    {
+        "id": "RPI01",
+        "serial_code": "e4-5f-01-17-37-89",
+        "location": {
+            "coordinates": [
+                53.02295549999999,
+                40.0040327
+            ],
+            "timestamp": "2026-02-06T08:25:23+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU",
+            "locked": true
+        },
+        "online": true,
+        "config_confirmed": true,
+        "category": "TAG",
+        "hardware": "argo",
+        "model": "Raspberry Pi 4",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "Sp8mv",
+        "serial_code": "ca-3d-11-19-be-19",
+        "location": {
+            "coordinates": [
+                53.032914100000056,
+                40.004567099999996
+            ],
+            "timestamp": "2026-02-06T13:18:46+00:00",
+            "location_type": "FIXED",
+            "floor_id": "Wwj6lf1ydU",
+            "locked": true
+        },
+        "heartbeat": "2026-02-23T16:05:54+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "shock_detection": 0
+            },
+            "heartbeat_rate_s": 1800,
+            "dfu_auto_update": true,
+            "wirepas": {
+                "low_latency_mode": true,
+                "role": "SINK",
+                "otap_mode": "OTAP_DISABLED",
+                "gateway_mode": "VLV_BACKEND"
+            },
+            "positioning": {
+                "fixed_rate_s": 0,
+                "dynamic_mode": true
+            },
+            "vehicle": {
+                "allow_driving": true,
+                "driving_timeout_s": 210
+            }
+        },
+        "config_confirmed": true,
+        "state": {
+            "power": {
+                "battery_level": 89,
+                "battery_charging": false,
+                "usb_power": true
+            },
+            "app_version": "velavu-gateway_2.8.4_argo-revB_OPEN",
+            "cell": {
+                "operator_name": "42402",
+                "iccid": "89883070000063686941",
+                "psm_rat": -1,
+                "reg_status": "REGISTERED_ROAMING",
+                "psm_tau": 1800,
+                "imei": "350916060708149",
+                "rsrp": 48,
+                "band": 20,
+                "fw_version": "mfw_nrf9160_1.3.6",
+                "apn": "super"
+            },
+            "vehicle": {
+                "driving": false
+            },
+            "gnss": {
+                "valid_fix": false,
+                "sats_in_view": 0,
+                "snr": 0
+            },
+            "led_flash_on": false
+        },
+        "category": "TAG",
+        "hardware": "argo",
+        "model": "Vesta",
+        "site_id": "6qThBMaWlF"
+    },
+    {
+        "id": "W2p3n",
+        "serial_code": "e3-2a-b1-a9-78-8c",
+        "location": {
+            "coordinates": [
+                53.016644,
+                40.003742
+            ],
+            "timestamp": "2026-02-16T05:43:02+00:00",
+            "accuracy": 0.6,
+            "location_type": "MESH",
+            "floor_id": "Wwj6lf1ydU"
+        },
+        "heartbeat": "2026-02-23T16:09:22+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "role": "SUBNODE",
+                "participate_otap": true,
+                "routing_info": false
+            },
+            "positioning": {
+                "wpe_enabled": true,
+                "fixed_rate_s": 0,
+                "dynamic_rate_s": 30,
+                "dynamic_mode": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "routing": {
+                "rssi": 0,
+                "install_quality": 24,
+                "device_id": "RPI01",
+                "tx_power": 4
+            },
+            "power": {
+                "battery_level": 38,
+                "battery_charging": false,
+                "usb_power": false
+            },
+            "app_version": "minew-b10-app_1.2.0_minew-b10_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 34265,
+                "processed_otap_crc": 65535
+            }
+        },
+        "category": "TAG",
+        "hardware": "panicbutton",
+        "model": "Minew B10",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF",
+        "asset": {
+            "id": "TVc3PJJIks",
+            "category": "EQUIPMENT",
+            "group": "Staff",
+            "name": "STAFF 05",
+            "notes": "",
+            "device_id": "W2p3n",
+            "online": true
+        }
+    },
+    {
+        "id": "z8LrH",
+        "serial_code": "eb-f1-7a-22-2f-1b",
+        "location": {
+            "coordinates": [
+                53.042458,
+                40.003143
+            ],
+            "timestamp": "2026-02-17T12:17:00+00:00",
+            "accuracy": 0,
+            "location_type": "MESH"
+        },
+        "heartbeat": "2026-02-23T16:09:49+00:00",
+        "online": true,
+        "config": {
+            "imu": {
+                "motion_cooldown_s": 15,
+                "motion_detection": false
+            },
+            "heartbeat_rate_s": 1800,
+            "beacon": {
+                "interval_ms": 0,
+                "tx_power": 0
+            },
+            "wirepas": {
+                "role": "SUBNODE",
+                "participate_otap": true,
+                "routing_info": false
+            },
+            "positioning": {
+                "wpe_enabled": true,
+                "fixed_rate_s": 0,
+                "dynamic_rate_s": 30,
+                "dynamic_mode": true
+            },
+            "state_update_rate_s": 1800
+        },
+        "config_confirmed": true,
+        "state": {
+            "app_version": "minew-b10-app_1.2.0_minew-b10_OPEN",
+            "wirepas": {
+                "stored_otap_crc": 34265,
+                "processed_otap_crc": 65535
+            },
+            "power": {
+                "battery_level": 29,
+                "battery_charging": false,
+                "usb_power": false
+            }
+        },
+        "category": "TAG",
+        "hardware": "panicbutton",
+        "model": "Minew B10",
+        "gateway_id": "Sp8mv",
+        "site_id": "6qThBMaWlF",
+        "asset": {
+            "id": "3moVUfQaav",
+            "category": "EQUIPMENT",
+            "group": "Staff",
+            "name": "STAFF 03",
+            "notes": "",
+            "device_id": "z8LrH",
+            "online": true
+        }
+    }
+]

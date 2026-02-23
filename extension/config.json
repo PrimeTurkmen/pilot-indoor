@@ -1,19 +1,35 @@
 {
   "appName": "Indoor Positioning",
-  "version": "2.0.0",
-  "description": "Indoor people and asset tracking with ELA Innovation / Wirepas mesh + BLE 6.0 Channel Sounding for PILOT Telematics",
+  "version": "4.0.0",
+  "description": "Dual-engine indoor positioning: Velavu Cloud + BLE Channel Sounding for PILOT Telematics",
+  "engines": {
+    "velavu": {
+      "enabled": true,
+      "label": "Velavu Cloud",
+      "apiBase": "/api/velavu"
+    },
+    "channelSounding": {
+      "enabled": true,
+      "label": "Channel Sounding",
+      "apiBase": "/api/indoor"
+    }
+  },
   "loadOrder": [
     "IndoorNavPanel.js",
     "FloorPlanView.js",
     "DeviceGrid.js",
+    "AssetPanel.js",
     "ZoneManager.js",
     "AdminPanel.js",
     "Module.js"
   ],
   "styles": "styles.css",
   "settings": {
-    "devicesApiUrl": "",
-    "defaultFloorPlanBounds": [[0, 0], [1000, 800]],
-    "deviceRefreshInterval": 5000
+    "defaultEngine": "velavu",
+    "deviceRefreshInterval": 10000,
+    "mapProvider": "osm",
+    "defaultZoom": 17,
+    "showAnchors": false,
+    "showSensorData": true
   }
 }

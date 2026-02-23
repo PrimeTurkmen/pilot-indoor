@@ -1,0 +1,517 @@
+[
+    {
+        "id": "ounKsjLEFU",
+        "name": "Pilot testing",
+        "online": false,
+        "coordinates": [
+            -15.548274,
+            28.10541
+        ],
+        "boundary": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        -15.548250661485163,
+                        28.105285383095183
+                    ],
+                    [
+                        -15.548389430240265,
+                        28.105349033995743
+                    ],
+                    [
+                        -15.548336438632782,
+                        28.105444522458832
+                    ],
+                    [
+                        -15.548204939941913,
+                        28.105444522458832
+                    ],
+                    [
+                        -15.548204939941913,
+                        28.105387923614195
+                    ],
+                    [
+                        -15.548218349267497,
+                        28.105340194745814
+                    ],
+                    [
+                        -15.548250661485163,
+                        28.105285383095183
+                    ]
+                ]
+            ]
+        },
+        "boundary_factor": 1.5,
+        "floors": [
+            {
+                "name": "Floor 2",
+                "level": 2,
+                "floorplan": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "id": "T2pY5OMUtE",
+                "img": {
+                    "filename": "velavu_floor.png",
+                    "scale": 0.001787396562989193,
+                    "rotation": 0,
+                    "opacity": 0.5,
+                    "width": 6831,
+                    "height": 2893,
+                    "center": [
+                        -15.54827351328774,
+                        28.105410302992766
+                    ],
+                    "coordinates": [
+                        [
+                            -15.548328354114961,
+                            28.105430789940225
+                        ],
+                        [
+                            -15.548218672460518,
+                            28.105430789940225
+                        ],
+                        [
+                            -15.548218672460518,
+                            28.1053898160414
+                        ],
+                        [
+                            -15.548328354114961,
+                            28.1053898160414
+                        ]
+                    ],
+                    "url": "https://velavuapp-prod.s3.amazonaws.com/q1xy60ZEjtb6VKGLHpwi8xXEOQw1toigpng?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA3S6OEMD6JMAFNRUJ%2F20260223%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20260223T163144Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEBcaCXVzLWVhc3QtMiJGMEQCIB4lTZL%2FDs4TcLqURy5J3hMYbFAk2K5yKBvvuCK40KDxAiB4iALdqgM%2BhQSzPHE0vpyXn76tuYIxzpGFRG%2FZpBEU8iqRAwjh%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAQaDDc5NjYxMTg2Mjc4MCIMvuBZihWcRpMowgjgKuUCin8gvScxyoHQlaSgH8z46x%2FQP4KGtPFY6AAP2ddd0YoxYuJmnPIWGpu1lQPqCKMukwUqXkwxkj99OyrGRb1oMvPdCdIXuIkk%2BrsPdoLDhFgtL5Q9hejeAGi0Qlpcjam8fKQlSCPGYS1Yumq1kV7eM24UIek%2ByJQtmQWPcYrKMUQ4Yl%2B0SHl7hjQQIl6%2ByLg9LwHTmxaSwSMoYQbqQQvAyAiaQLNrv%2BjWkOcZyoUBfyy6er98XWwAmsMkBd%2BGlaCPHWDWmibd5Ws0vI335k8rRNpbo9nTUodr3Jt4rVQhIeRRISeEe643PTB44E0L4fEfdufSoABB%2F7dy05D6A1%2BO%2Br1Yx4SYXgkhven7uvAp9i8dhLCi528bKaOjcoAgfs5UFLbLRHoCq9oXA8x4oPmUHvTSTGLWVd3F6X5vjqIDh3YR%2B4G5%2FmHxP31ogJPWW466RWwQKU%2BYmGlmpQjii9roRus9xU3UMOTi8cwGOp8Bm8aeyMHuKOEH2l9UZepUIaAFU4H0aMQkaIwo5zGhErDG7zVY1NL0HCXqPvFFlzIVa22jMQfWaLHPW6w3GsJGAI0UDbglFxxi2TmhLMGNXVuv8xgk4fO5D9ZJ6FWmvzBrOSIO2xobYFKSMPoEoKiwSqGEJtROW96JIGTKqdxFi18y1tXBiEj2VLisVi0GYMbUrCcwsoQSEOq1lGvI3DQE&X-Amz-Signature=f7109214850e250450279694c4d7e6de98b82b6e25c2b7f04281f5ec61bb362f"
+                },
+                "geometry": {
+                    "walls": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [
+                                            -15.548328354114961,
+                                            28.105430789940225
+                                        ],
+                                        [
+                                            -15.548328354114961,
+                                            28.1053898160414
+                                        ],
+                                        [
+                                            -15.548218672460518,
+                                            28.1053898160414
+                                        ],
+                                        [
+                                            -15.548218672460518,
+                                            28.105430789940225
+                                        ],
+                                        [
+                                            -15.548328354114961,
+                                            28.105430789940225
+                                        ]
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "Floor 3",
+                "level": 3,
+                "floorplan": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "id": "YAh7uwXekQ",
+                "img": {
+                    "filename": "velavu_telegram.jpg",
+                    "scale": 0.011046985089751283,
+                    "rotation": 332.5255662820013,
+                    "opacity": 0.5,
+                    "width": 1220,
+                    "height": 568,
+                    "center": [
+                        -15.548300657455371,
+                        28.105350481961636
+                    ],
+                    "coordinates": [
+                        [
+                            -15.548341362194439,
+                            28.10539717268427
+                        ],
+                        [
+                            -15.548233947886008,
+                            28.105347903562436
+                        ],
+                        [
+                            -15.548259952716307,
+                            28.10530379121866
+                        ],
+                        [
+                            -15.548367367024733,
+                            28.10535306036075
+                        ]
+                    ],
+                    "url": "https://velavuapp-prod.s3.amazonaws.com/BiofMrErRzVu4G4lAV0jn8iUryxI9FAdpng?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA3S6OEMD6JMAFNRUJ%2F20260223%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20260223T163144Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEBcaCXVzLWVhc3QtMiJGMEQCIB4lTZL%2FDs4TcLqURy5J3hMYbFAk2K5yKBvvuCK40KDxAiB4iALdqgM%2BhQSzPHE0vpyXn76tuYIxzpGFRG%2FZpBEU8iqRAwjh%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAQaDDc5NjYxMTg2Mjc4MCIMvuBZihWcRpMowgjgKuUCin8gvScxyoHQlaSgH8z46x%2FQP4KGtPFY6AAP2ddd0YoxYuJmnPIWGpu1lQPqCKMukwUqXkwxkj99OyrGRb1oMvPdCdIXuIkk%2BrsPdoLDhFgtL5Q9hejeAGi0Qlpcjam8fKQlSCPGYS1Yumq1kV7eM24UIek%2ByJQtmQWPcYrKMUQ4Yl%2B0SHl7hjQQIl6%2ByLg9LwHTmxaSwSMoYQbqQQvAyAiaQLNrv%2BjWkOcZyoUBfyy6er98XWwAmsMkBd%2BGlaCPHWDWmibd5Ws0vI335k8rRNpbo9nTUodr3Jt4rVQhIeRRISeEe643PTB44E0L4fEfdufSoABB%2F7dy05D6A1%2BO%2Br1Yx4SYXgkhven7uvAp9i8dhLCi528bKaOjcoAgfs5UFLbLRHoCq9oXA8x4oPmUHvTSTGLWVd3F6X5vjqIDh3YR%2B4G5%2FmHxP31ogJPWW466RWwQKU%2BYmGlmpQjii9roRus9xU3UMOTi8cwGOp8Bm8aeyMHuKOEH2l9UZepUIaAFU4H0aMQkaIwo5zGhErDG7zVY1NL0HCXqPvFFlzIVa22jMQfWaLHPW6w3GsJGAI0UDbglFxxi2TmhLMGNXVuv8xgk4fO5D9ZJ6FWmvzBrOSIO2xobYFKSMPoEoKiwSqGEJtROW96JIGTKqdxFi18y1tXBiEj2VLisVi0GYMbUrCcwsoQSEOq1lGvI3DQE&X-Amz-Signature=dea8e08bfe7f2c8075813df9a3f6003a55b698798ce191f65f1c0cb7b7c989bd"
+                },
+                "geometry": {
+                    "walls": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [
+                                            -15.548345116094442,
+                                            28.10539793271959
+                                        ],
+                                        [
+                                            -15.548370228287462,
+                                            28.105355334588612
+                                        ],
+                                        [
+                                            -15.548256198816304,
+                                            28.105303031182675
+                                        ],
+                                        [
+                                            -15.548231086623284,
+                                            28.10534562933439
+                                        ],
+                                        [
+                                            -15.548345116094442,
+                                            28.10539793271959
+                                        ]
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "id": "oyKoPxBnzt",
+        "name": "srdtfhgj",
+        "online": false,
+        "coordinates": [
+            48.741849,
+            55.75384
+        ],
+        "boundary": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        48.74180456952766,
+                        55.75341498491368
+                    ],
+                    [
+                        48.74140549978461,
+                        55.75351905138632
+                    ],
+                    [
+                        48.741325428703824,
+                        55.753540528658164
+                    ],
+                    [
+                        48.7416400682353,
+                        55.754198927013746
+                    ],
+                    [
+                        48.74168646771918,
+                        55.75423024901637
+                    ],
+                    [
+                        48.74232408554113,
+                        55.75403728089446
+                    ],
+                    [
+                        48.74180456952766,
+                        55.75341498491368
+                    ]
+                ]
+            ]
+        },
+        "boundary_factor": 1.5,
+        "floors": [
+            {
+                "name": "fdfb",
+                "level": 1,
+                "floorplan": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "id": "CkehAl5jn9",
+                "img": {
+                    "filename": "Copilot_20260205_004455.png",
+                    "scale": 0.036762714372495314,
+                    "rotation": 341.4532749893376,
+                    "opacity": 0.5,
+                    "width": 1024,
+                    "height": 1536,
+                    "center": [
+                        48.741849,
+                        55.75384
+                    ],
+                    "coordinates": [
+                        [
+                            48.74176936958019,
+                            55.75400558210794
+                        ],
+                        [
+                            48.742089977491915,
+                            55.75394505032553
+                        ],
+                        [
+                            48.74192863041981,
+                            55.7536744171891
+                        ],
+                        [
+                            48.741608022508096,
+                            55.75373494939153
+                        ]
+                    ],
+                    "url": "https://velavuapp-prod.s3.amazonaws.com/xOE5iTSEs9eGJC4uTHv104drikEzqy4Bpng?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA3S6OEMD6JMAFNRUJ%2F20260223%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20260223T163144Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEBcaCXVzLWVhc3QtMiJGMEQCIB4lTZL%2FDs4TcLqURy5J3hMYbFAk2K5yKBvvuCK40KDxAiB4iALdqgM%2BhQSzPHE0vpyXn76tuYIxzpGFRG%2FZpBEU8iqRAwjh%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAQaDDc5NjYxMTg2Mjc4MCIMvuBZihWcRpMowgjgKuUCin8gvScxyoHQlaSgH8z46x%2FQP4KGtPFY6AAP2ddd0YoxYuJmnPIWGpu1lQPqCKMukwUqXkwxkj99OyrGRb1oMvPdCdIXuIkk%2BrsPdoLDhFgtL5Q9hejeAGi0Qlpcjam8fKQlSCPGYS1Yumq1kV7eM24UIek%2ByJQtmQWPcYrKMUQ4Yl%2B0SHl7hjQQIl6%2ByLg9LwHTmxaSwSMoYQbqQQvAyAiaQLNrv%2BjWkOcZyoUBfyy6er98XWwAmsMkBd%2BGlaCPHWDWmibd5Ws0vI335k8rRNpbo9nTUodr3Jt4rVQhIeRRISeEe643PTB44E0L4fEfdufSoABB%2F7dy05D6A1%2BO%2Br1Yx4SYXgkhven7uvAp9i8dhLCi528bKaOjcoAgfs5UFLbLRHoCq9oXA8x4oPmUHvTSTGLWVd3F6X5vjqIDh3YR%2B4G5%2FmHxP31ogJPWW466RWwQKU%2BYmGlmpQjii9roRus9xU3UMOTi8cwGOp8Bm8aeyMHuKOEH2l9UZepUIaAFU4H0aMQkaIwo5zGhErDG7zVY1NL0HCXqPvFFlzIVa22jMQfWaLHPW6w3GsJGAI0UDbglFxxi2TmhLMGNXVuv8xgk4fO5D9ZJ6FWmvzBrOSIO2xobYFKSMPoEoKiwSqGEJtROW96JIGTKqdxFi18y1tXBiEj2VLisVi0GYMbUrCcwsoQSEOq1lGvI3DQE&X-Amz-Signature=614e98fc51050e5a081863adb4ef584bd9ca22b9d914884d69abd72ecf14fd5c"
+                },
+                "geometry": {
+                    "walls": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [
+                                            48.74169219222691,
+                                            55.75415399734294
+                                        ],
+                                        [
+                                            48.742208795185064,
+                                            55.75400279548117
+                                        ],
+                                        [
+                                            48.74178058051342,
+                                            55.753489863709746
+                                        ],
+                                        [
+                                            48.74142247923933,
+                                            55.75358324672635
+                                        ]
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [
+                                            48.74141978384756,
+                                            55.75358396970475
+                                        ],
+                                        [
+                                            48.741697451996714,
+                                            55.754157547954065
+                                        ],
+                                        [
+                                            48.741697451996714,
+                                            55.754157547954065
+                                        ]
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "id": "6qThBMaWlF",
+        "name": "Turkmenbashy Port Adm ",
+        "online": true,
+        "coordinates": [
+            53.025604,
+            40.004135
+        ],
+        "boundary": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        53.017207676656035,
+                        39.99960093653664
+                    ],
+                    [
+                        53.01232074339166,
+                        40.000924728944774
+                    ],
+                    [
+                        53.00927778450519,
+                        40.00369822935609
+                    ],
+                    [
+                        53.01043032023658,
+                        40.00965659387138
+                    ],
+                    [
+                        53.048998721339025,
+                        40.01067459529053
+                    ],
+                    [
+                        53.052454491227245,
+                        40.00786212899543
+                    ],
+                    [
+                        53.048845658954896,
+                        40.001855378483114
+                    ],
+                    [
+                        53.0429741389538,
+                        40.00062346684487
+                    ],
+                    [
+                        53.02432956103844,
+                        39.99980597426905
+                    ],
+                    [
+                        53.017207676656035,
+                        39.99960093653664
+                    ]
+                ]
+            ]
+        },
+        "boundary_factor": 1.5,
+        "floors": [
+            {
+                "name": "Port 001",
+                "level": 1,
+                "floorplan": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "id": "Wwj6lf1ydU",
+                "geometry": {
+                    "walls": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [
+                                            53.01289237883594,
+                                            40.00613659294359
+                                        ],
+                                        [
+                                            53.0124246588465,
+                                            40.00730346655726
+                                        ],
+                                        [
+                                            53.017099383036,
+                                            40.007238463069314
+                                        ],
+                                        [
+                                            53.03692355205479,
+                                            40.00762406468337
+                                        ],
+                                        [
+                                            53.04817162937553,
+                                            40.008246997159745
+                                        ],
+                                        [
+                                            53.04931907628969,
+                                            40.00731315148255
+                                        ],
+                                        [
+                                            53.04759644087136,
+                                            40.00687421951014
+                                        ],
+                                        [
+                                            53.047324673620494,
+                                            40.00399355158129
+                                        ],
+                                        [
+                                            53.042602884422706,
+                                            40.00380729033398
+                                        ],
+                                        [
+                                            53.042672552881385,
+                                            40.00301748376921
+                                        ],
+                                        [
+                                            53.04201642992672,
+                                            40.00299984082392
+                                        ],
+                                        [
+                                            53.041911319780326,
+                                            40.00342170230232
+                                        ],
+                                        [
+                                            53.036814511294466,
+                                            40.00310996841341
+                                        ],
+                                        [
+                                            53.02799161416422,
+                                            40.002387132736715
+                                        ],
+                                        [
+                                            53.02424227888008,
+                                            40.00220938759054
+                                        ],
+                                        [
+                                            53.024243279399826,
+                                            40.00346585635799
+                                        ],
+                                        [
+                                            53.02300141660524,
+                                            40.00353823415156
+                                        ],
+                                        [
+                                            53.01938000931332,
+                                            40.00216678516199
+                                        ],
+                                        [
+                                            53.01749357541951,
+                                            40.00201509366775
+                                        ],
+                                        [
+                                            53.01647591460517,
+                                            40.00408873689503
+                                        ],
+                                        [
+                                            53.01351091613154,
+                                            40.00309393265417
+                                        ],
+                                        [
+                                            53.01189524896725,
+                                            40.004566530119945
+                                        ],
+                                        [
+                                            53.01289237883594,
+                                            40.00613659294359
+                                        ]
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+]

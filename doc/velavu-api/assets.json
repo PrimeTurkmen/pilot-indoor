@@ -1,0 +1,47 @@
+[
+    {
+        "id": "xtkKOoCxYV",
+        "category": "EQUIPMENT",
+        "group": "Staff",
+        "name": "STAFF 01",
+        "notes": "",
+        "device_id": "3fHPC",
+        "online": true
+    },
+    {
+        "id": "ZcgOgUTpRm",
+        "category": "EQUIPMENT",
+        "group": "Staff",
+        "name": "STAFF 02",
+        "notes": "",
+        "device_id": "KrWoN",
+        "online": true
+    },
+    {
+        "id": "3moVUfQaav",
+        "category": "EQUIPMENT",
+        "group": "Staff",
+        "name": "STAFF 03",
+        "notes": "",
+        "device_id": "z8LrH",
+        "online": true
+    },
+    {
+        "id": "vznyRGpk0x",
+        "category": "EQUIPMENT",
+        "group": "Staff",
+        "name": "STAFF 04",
+        "notes": "",
+        "device_id": "Pz6QG",
+        "online": true
+    },
+    {
+        "id": "TVc3PJJIks",
+        "category": "EQUIPMENT",
+        "group": "Staff",
+        "name": "STAFF 05",
+        "notes": "",
+        "device_id": "W2p3n",
+        "online": true
+    }
+]
