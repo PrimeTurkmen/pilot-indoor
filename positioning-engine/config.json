@@ -5,7 +5,8 @@
     "password": "",
     "topics": {
       "distances": "pilot/indoor/distances/+",
-      "positions": "pilot/indoor/positions/"
+      "wirepas": "wirepas/+/received_data",
+      "ela": "ela/+/data"
     }
   },
   "pilot": {
@@ -17,8 +18,13 @@
     "min_anchors": 3,
     "max_distance_m": 30,
     "kalman_enabled": true,
-    "outlier_threshold_m": 10
+    "outlier_threshold_m": 10,
+    "channel_sounding": {
+      "enabled": true,
+      "min_confidence": 0.6
+    }
   },
+  "tag_mappings": [],
   "floors": [
     {
       "id": 1,

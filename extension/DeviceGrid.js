@@ -85,7 +85,7 @@ Ext.define('Store.indoor-positioning.DeviceGrid', {
 
         if (!me.store) {
             me.store = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'type', 'zone', 'battery', 'lastUpdate', 'status', 'x', 'y', 'floor'],
+                fields: ['id', 'name', 'type', 'zone', 'battery', 'temperature', 'humidity', 'lastUpdate', 'status', 'isMoving', 'x', 'y', 'floor', 'confidence'],
                 proxy: {
                     type: 'ajax',
                     url: me.storeUrl || '/ax/indoor/devices.php',

@@ -193,12 +193,18 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
                     weight: 2,
                     fillOpacity: 0.9
                 });
-                marker.bindPopup(
-                    '<b>' + Ext.String.htmlEncode(name) + '</b><br/>' +
-                    (r.get('zone') ? Ext.String.htmlEncode(r.get('zone')) + '<br/>' : '') +
-                    (r.get('battery') != null ? 'Battery: ' + r.get('battery') + '%<br/>' : '') +
-                    (r.get('lastUpdate') ? 'Updated: ' + (Ext.isDate(r.get('lastUpdate')) ? Ext.util.Format.date(r.get('lastUpdate'), 'd.m.Y H:i') : r.get('lastUpdate')) : '')
-                );
+                var popupLines = ['<b>' + Ext.String.htmlEncode(name) + '</b>'];
+                if (r.get('zone')) popupLines.push(Ext.String.htmlEncode(r.get('zone')));
+                if (r.get('battery') != null) popupLines.push('🔋 ' + r.get('battery') + '%');
+                if (r.get('temperature') != null) popupLines.push('🌡️ ' + r.get('temperature') + '°C');
+                if (r.get('humidity') != null) popupLines.push('💧 ' + r.get('humidity') + '%');
+                if (r.get('isMoving') != null) popupLines.push(r.get('isMoving') ? '🏃 Moving' : '🅿️ Parked');
+                if (r.get('confidence') != null) popupLines.push('📡 ' + Math.round(r.get('confidence') * 100) + '% conf');
+                if (r.get('lastUpdate')) {
+                    var d = typeof r.get('lastUpdate') === 'number' ? new Date(r.get('lastUpdate') * 1000) : new Date(r.get('lastUpdate'));
+                    if (!isNaN(d.getTime())) popupLines.push('🕐 ' + Ext.util.Format.date(d, 'd.m.Y H:i:s'));
+                }
+                marker.bindPopup(popupLines.join('<br/>'));
                 me.deviceMarkerLayer.addLayer(marker);
             }
         }

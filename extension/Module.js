@@ -51,7 +51,7 @@ Ext.define('Store.indoor-positioning.Module', {
         var refreshInterval = settings.deviceRefreshInterval || 5000;
         var deviceStore = Ext.create('Ext.data.Store', {
             storeId: 'indoorDevicesStore',
-            fields: ['id', 'name', 'type', 'zone', 'battery', 'lastUpdate', 'status', 'x', 'y', 'floor'],
+            fields: ['id', 'name', 'type', 'zone', 'battery', 'temperature', 'humidity', 'lastUpdate', 'status', 'isMoving', 'x', 'y', 'floor', 'confidence'],
             proxy: {
                 type: 'ajax',
                 url: devicesApiUrl,
