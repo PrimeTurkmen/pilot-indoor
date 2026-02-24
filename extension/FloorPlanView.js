@@ -83,16 +83,15 @@ Ext.define('Store.indoor-positioning.FloorPlanView', {
         me._selectedZoneId   = null;
         me._restrictedZoneNames = {};
 
-        me.dockedItems = [
-            {
-                xtype: 'indoor-devicegrid',
-                dock: 'bottom',
-                height: 200,
-                split: true,
-                mapPanel: me,
-                store: me.deviceStore || null
-            }
-        ];
+        me._deviceGrid = Ext.create('Store.indoor-positioning.DeviceGrid', {
+            dock: 'bottom',
+            height: 200,
+            split: true,
+            mapPanel: me,
+            store: me.deviceStore || null
+        });
+
+        me.dockedItems = [ me._deviceGrid ];
 
         me.listeners = {
             render: function () {
