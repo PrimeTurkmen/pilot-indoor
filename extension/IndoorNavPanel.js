@@ -149,7 +149,8 @@ Ext.define('Store.indoor-positioning.IndoorNavPanel', {
             scope: me
         });
 
-        me.addEvents('deviceselect', 'floorselect', 'siteselect', 'refreshrequested');
+        /* Events: deviceselect, floorselect, siteselect, refreshrequested */
+        /* (no addEvents call — Ext JS 5+ fires custom events without declaration) */
 
         me.callParent();
     },
