@@ -6,12 +6,12 @@
     "velavu": {
       "enabled": true,
       "label": "Velavu Cloud",
-      "apiBase": "/api/velavu"
+      "apiBase": "http://13.218.85.146/api/velavu"
     },
     "channelSounding": {
       "enabled": true,
       "label": "Channel Sounding",
-      "apiBase": "/api/indoor"
+      "apiBase": "http://13.218.85.146/api/indoor"
     }
   },
   "loadOrder": [

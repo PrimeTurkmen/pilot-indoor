@@ -1028,9 +1028,19 @@ Ext.define('Store.indoor-positioning.Module', {
     velavuConnectWebSocket: function (apiBase) {
         var me = this;
 
-        // Derive WebSocket URL from current page location + api base
-        var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        var wsUrl = protocol + '//' + window.location.host + apiBase + '/ws';
+        // Derive WebSocket URL from apiBase (may be absolute URL to our engine server)
+        var wsUrl;
+        if (apiBase.indexOf('http://') === 0 || apiBase.indexOf('https://') === 0) {
+            // Absolute URL — extract host from apiBase
+            var a = document.createElement('a');
+            a.href = apiBase;
+            var wsProtocol = a.protocol === 'https:' ? 'wss:' : 'ws:';
+            wsUrl = wsProtocol + '//' + a.host + '/ws';
+        } else {
+            // Relative URL — use current page host
+            var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            wsUrl = protocol + '//' + window.location.host + apiBase + '/ws';
+        }
 
         me._wsReconnectDelay = me.WS_RECONNECT_MIN;
 
