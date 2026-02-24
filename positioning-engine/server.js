@@ -487,8 +487,8 @@ apiServer.listen(API_PORT, () => {
 if (wsConfig.enabled !== false) {
     wsBroadcaster.attach(apiServer, wsConfig.heartbeat_interval || 30000);
 
-    // Wire Velavu WebSocket subscribers
-    wsBroadcaster.on('connection', (ws) => {
+    // Wire Velavu WebSocket subscribers (use _wss — Broadcaster has no .on())
+    wsBroadcaster._wss.on('connection', (ws) => {
         ws.on('message', (msg) => {
             try {
                 const parsed = JSON.parse(msg);
