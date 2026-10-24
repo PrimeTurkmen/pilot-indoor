@@ -1,0 +1,15 @@
+.rental-booster-tab .rb-count { font-weight: 600; color: #0a67a0; }
+.rental-booster-tab .rb-moving { color: #16a34a; }
+.rental-booster-tab .rb-parked { color: #64748b; }
+
+.rb-chat { padding: 4px; font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+.rb-msg-user {
+  background: #0a67a0; color: #fff;
+  border-radius: 12px 12px 2px 12px;
+  padding: 8px 11px; margin: 6px 0 6px 40px; white-space: pre-wrap; word-break: break-word;
+}
+.rb-msg-ai {
+  background: #f1f5f9; color: #1e293b;
+  border-radius: 12px 12px 12px 2px;
+  padding: 8px 11px; margin: 6px 40px 6px 0; white-space: pre-wrap; word-break: break-word;
+}

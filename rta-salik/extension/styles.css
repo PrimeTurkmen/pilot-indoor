@@ -1,0 +1,24 @@
+.rta-salik-tab .rs-count { font-weight: 600; color: #0a67a0; }
+.rta-salik-tab .rs-unpaid { color: #dc2626; }
+.rta-salik-tab .rs-total { color: #16a34a; }
+
+.rs-salik-notice {
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  padding: 10px 14px;
+  font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.rs-salik-notice-inner { color: #92400e; }
+.rs-salik-notice-inner i { margin-right: 6px; color: #d97706; }
+
+.rs-chat { padding: 4px; font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+.rs-msg-user {
+  background: #0a67a0; color: #fff;
+  border-radius: 12px 12px 2px 12px;
+  padding: 8px 11px; margin: 6px 0 6px 40px; white-space: pre-wrap; word-break: break-word;
+}
+.rs-msg-ai {
+  background: #f1f5f9; color: #1e293b;
+  border-radius: 12px 12px 12px 2px;
+  padding: 8px 11px; margin: 6px 40px 6px 0; white-space: pre-wrap; word-break: break-word;
+}

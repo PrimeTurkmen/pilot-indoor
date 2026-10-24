@@ -1,0 +1,10 @@
+{
+  "serverUrl": "https://pilot-ai.zamtek.ae",
+  "model": "deepseek-chat",
+  "contextMaxVehicles": 300,
+  "mileageLimitKm": 4500,
+  "gatherVehicles": true,
+  "gatherFines": true,
+  "gatherContracts": true,
+  "gatherTrips": true
+}

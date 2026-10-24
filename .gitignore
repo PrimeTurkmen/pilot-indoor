@@ -23,3 +23,10 @@ pilot-indoor-1/
 
 # Claude worktrees
 .claude/
+
+# Salik one-off / secret-bearing scripts (do not commit)
+salik/test_*.py
+salik/switch_deepseek.py
+salik/reset_mail_pw.py
+salik/patch_snap_retention.py
+salik/*.json

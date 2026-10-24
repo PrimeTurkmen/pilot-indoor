@@ -1,0 +1,10 @@
+{
+  "aiServerUrl": "https://apiport.ae/pilot-ai",
+  "refreshInterval": 30000,
+  "mileageLimitKm": 4500,
+  "mileageField": "current_mileage",
+  "showFines": true,
+  "showContracts": true,
+  "showAI": true,
+  "contextMaxVehicles": 300
+}

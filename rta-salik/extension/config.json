@@ -1,0 +1,8 @@
+{
+  "aiServerUrl": "https://pilot-ai.zamtek.ae",
+  "refreshInterval": 3600000,
+  "showFleet": true,
+  "showAI": true,
+  "contextMaxVehicles": 300,
+  "salikSourceUrl": ""
+}

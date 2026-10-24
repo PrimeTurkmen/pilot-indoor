@@ -1,0 +1,6 @@
+tunnel: 90ea81c2-7642-4e86-bf8d-3c438b693c6f
+credentials-file: /home/ceo/.cloudflared/90ea81c2-7642-4e86-bf8d-3c438b693c6f.json
+ingress:
+  - hostname: pilot-ai.zamtek.ae
+    service: http://127.0.0.1:8790
+  - service: http_status:404
