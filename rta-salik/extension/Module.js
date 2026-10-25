@@ -125,7 +125,7 @@ Ext.define('Store.rta_salik.Module', {
     buildFinesStore: function () {
         return Ext.create('Ext.data.Store', {
             storeId: 'rsFinesStore',
-            fields: ['id', 'plate', 'type', 'date', 'amount', 'paid', 'source'],
+            fields: ['id', 'plate', 'type', 'date', 'amount', 'paid', 'source', 'agentid'],
             data: []
         });
     },
@@ -141,7 +141,7 @@ Ext.define('Store.rta_salik.Module', {
     buildSalikStore: function () {
         return Ext.create('Ext.data.Store', {
             storeId: 'rsSalikStore',
-            fields: ['plate', 'trips', 'total'],
+            fields: ['plate', 'trips', 'total', 'agentid', 'lastTripDate'],
             data: []
         });
     },
@@ -160,6 +160,11 @@ Ext.define('Store.rta_salik.Module', {
                 itemId: 'rsFinesGrid',
                 store: this.finesStore,
                 emptyText: 'No RTA fines for this fleet.',
+                listeners: {
+                    itemclick: function (grid, record) {
+                        me.showOnMap(record.get('agentid'), record.get('date'));
+                    }
+                },
                 columns: [
                     { text: 'Plate', dataIndex: 'plate', flex: 1 },
                     { text: 'Type', dataIndex: 'type', flex: 1 },
@@ -183,6 +188,11 @@ Ext.define('Store.rta_salik.Module', {
                 itemId: 'rsSalikGrid',
                 store: this.salikStore,
                 emptyText: 'No Salik tolls for this fleet.',
+                listeners: {
+                    itemclick: function (grid, record) {
+                        me.showOnMap(record.get('agentid'), record.get('lastTripDate'));
+                    }
+                },
                 columns: [
                     { text: 'Plate', dataIndex: 'plate', flex: 1 },
                     { text: 'Trips (30d)', dataIndex: 'trips', width: 110, align: 'right' },
@@ -248,7 +258,10 @@ Ext.define('Store.rta_salik.Module', {
                     var raw = (r.get('plateRaw') || '').trim();
                     var e = data[raw];
                     if (e && !e.error) {
-                        rows.push({ plate: r.get('plate'), trips: e.tripCount || 0, total: e.totalTolls || 0 });
+                        var tolls = e.tolls || [];
+                        var lastTrip = tolls.length ? tolls[tolls.length - 1].date : '';
+                        rows.push({ plate: r.get('plate'), trips: e.tripCount || 0, total: e.totalTolls || 0,
+                                    agentid: r.get('agentid'), lastTripDate: lastTrip });
                     }
                 });
                 me.salikStore.loadData(rows);
@@ -260,9 +273,10 @@ Ext.define('Store.rta_salik.Module', {
         var me = this;
         var plates = [];
         var cleanByRaw = {};
+        var agentidByRaw = {};
         this.fleetStore.each(function (r) {
             var raw = (r.get('plateRaw') || '').trim();
-            if (raw) { plates.push(raw); cleanByRaw[raw] = r.get('plate'); }
+            if (raw) { plates.push(raw); cleanByRaw[raw] = r.get('plate'); agentidByRaw[raw] = r.get('agentid'); }
         });
         if (!plates.length) { return; }
         var url = (this.config.aiServerUrl || '').replace(/\/+$/, '') + '/rta-fines';
@@ -285,7 +299,8 @@ Ext.define('Store.rta_salik.Module', {
                             source: f.source || 'RTA',
                             date: f.ticketDate || '',
                             amount: f.amount || 0,
-                            paid: 'No'
+                            paid: 'No',
+                            agentid: agentidByRaw[raw] || ''
                         });
                     });
                 });
@@ -293,6 +308,48 @@ Ext.define('Store.rta_salik.Module', {
                 me.updateCounts(rows);
             })
             .catch(function () { /* backend unreachable */ });
+    },
+
+    showOnMap: function (agentid, dateStr) {
+        var me = this;
+        var sk = (this.main && this.main.skeleton) || window.skeleton;
+        var mapframe = sk && sk.mapframe;
+        if (!mapframe || !agentid || !dateStr) { return; }
+        var ts = new Date(dateStr).getTime() / 1000;
+        if (!ts || isNaN(ts)) { return; }
+        var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+        var fmt = function (ms) {
+            var d = new Date(ms);
+            return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        };
+        var body = 'start=' + encodeURIComponent(fmt((ts - 1800) * 1000))
+            + '&end=' + encodeURIComponent(fmt((ts + 1800) * 1000))
+            + '&vehs=' + encodeURIComponent(agentid)
+            + '&weekdays=true&weekend=true&parkings=true';
+        fetch('/backend/ax/tracks_get_history.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body,
+            credentials: 'include'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (segments) {
+                var best = null, bestDist = Infinity;
+                (segments || []).forEach(function (seg) {
+                    var mid = (Number(seg.start_unixtimestamp) + Number(seg.end_unixtimestamp)) / 2;
+                    var dist = Math.abs(mid - ts);
+                    if (dist < bestDist) { bestDist = dist; best = seg; }
+                });
+                if (!best) { return; }
+                var lat = Number(best.lat), lon = Number(best.lon);
+                if (!lat || !lon) { return; }
+                var mp = mapframe.getMap ? mapframe.getMap() : mapframe.map;
+                if (mp && mp.setView) { mp.setView([lat, lon], 15); }
+                if (mapframe.addMarker) {
+                    mapframe.addMarker({ lat: lat, lon: lon, size: 'medium', poupContent: (best.veh_name || '') + ' @ ' + (best.start || '') });
+                }
+            })
+            .catch(function () {});
     },
 
     loadFleet: function (cb) {
