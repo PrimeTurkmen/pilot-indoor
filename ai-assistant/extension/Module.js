@@ -131,10 +131,15 @@ Ext.define('Store.ai_assistant.Module', {
                         margin: '0 0 6 0',
                         items: [
                             { xtype: 'textfield', itemId: 'emailField', flex: 1,
-                              emptyText: 'Email for reports (saved locally)', value: me.getSavedEmail(),
-                              listeners: { change: function (f, v) { me.saveEmail(v); } } },
-                            { xtype: 'button', itemId: 'emailLastBtn', text: '✉ Email answer', width: 110, margin: '0 0 0 8',
-                              tooltip: 'Email the last AI answer to the address above',
+                              emptyText: 'Email for reports — confirm once', value: me.getVerifiedEmail(),
+                              enableKeyEvents: true,
+                              listeners: {
+                                  change: function (f, v) { me.emailChanged(v); }
+                              } },
+                            { xtype: 'button', itemId: 'emailConfirmBtn', text: 'Confirm', width: 74, margin: '0 0 0 8',
+                              handler: function () { me.confirmEmail(); } },
+                            { xtype: 'button', itemId: 'emailLastBtn', text: '✉ Email answer', width: 104, margin: '0 0 0 8',
+                              tooltip: 'Email the last AI answer to the confirmed address',
                               handler: function () { me.emailLastAnswer(); } }
                         ]
                     },
@@ -154,36 +159,121 @@ Ext.define('Store.ai_assistant.Module', {
                 afterrender: function () {
                     me.historyEl = me.win.down('#history').getEl();
                     me.renderHistory();
+                    me.emailChanged(me.getVerifiedEmail());
                 }
             }
         });
     },
 
-    getSavedEmail: function () {
-        try { return localStorage.getItem('ai_assistant_email') || ''; } catch (e) { return ''; }
+    /* Verified email (one-time confirmation via emailed code). Only this
+       address receives reports/answers — never a typed-but-unverified one. */
+    getVerifiedEmail: function () {
+        try { return localStorage.getItem('ai_assistant_email_verified') || ''; } catch (e) { return ''; }
     },
 
-    saveEmail: function (v) {
+    setVerifiedEmail: function (email) {
         try {
-            if (v && v.trim()) { localStorage.setItem('ai_assistant_email', v.trim()); }
+            if (email && email.trim()) {
+                localStorage.setItem('ai_assistant_email_verified', email.trim().toLowerCase());
+            }
         } catch (e) { /* storage blocked */ }
+    },
+
+    /* Field changed: reflect verified/unverified state on the Confirm button. */
+    emailChanged: function (v) {
+        var me = this;
+        var btn = me.win && me.win.down('#emailConfirmBtn');
+        if (!btn) { return; }
+        var cur = (v || '').trim().toLowerCase();
+        if (cur && cur === me.getVerifiedEmail()) {
+            btn.setText('✓ Confirmed');
+            btn.setIconCls ? btn.setIconCls('fa fa-check') : null;
+            btn.disable();
+        } else {
+            btn.setText('Confirm');
+            if (btn.setIconCls) { btn.setIconCls(''); }
+            btn.enable();
+        }
+    },
+
+    /* Request code → prompt → verify. cb(email) fires only on success. */
+    confirmEmail: function (cb) {
+        var me = this;
+        var field = me.win && me.win.down('#emailField');
+        var email = field ? (field.getValue() || '').trim().toLowerCase() : '';
+        if (!email || email.indexOf('@') < 0) {
+            Ext.Msg.alert('Email', 'Enter a valid email first.');
+            return;
+        }
+        if (email === me.getVerifiedEmail()) {
+            if (cb) { cb(email); }
+            return;
+        }
+        var api = function (path, body) {
+            return fetch(me.config.serverUrl.replace(/\/+$/, '') + path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }).then(function (r) { return r.json(); });
+        };
+        me.appendMessage('ai', '⏳ Sending confirmation code to ' + email + '…');
+        api('/email/request-code', { email: email })
+            .then(function (d) {
+                if (!d || d.status !== 'sent') {
+                    me.appendMessage('ai', '❌ Could not send code: ' + ((d && d.error) || 'unknown'));
+                    return;
+                }
+                Ext.Msg.prompt('Email confirmation',
+                    'Code sent to ' + email + '. Enter the 6-digit code:', function (btn, val) {
+                        if (btn !== 'ok' || !val) { return; }
+                        api('/email/confirm', { email: email, code: val.trim() })
+                            .then(function (r2) {
+                                if (r2 && r2.ok) {
+                                    me.setVerifiedEmail(email);
+                                    me.emailChanged(field.getValue());
+                                    me.appendMessage('ai', '✅ Email confirmed: ' + email + '. Reports will go here.');
+                                    if (cb) { cb(email); }
+                                } else {
+                                    me.appendMessage('ai', '❌ ' + ((r2 && r2.error) || 'wrong code'));
+                                }
+                            })
+                            .catch(function (e) { me.appendMessage('ai', '❌ Verify error: ' + e.message); });
+                    });
+            })
+            .catch(function (e) { me.appendMessage('ai', '❌ Code send error: ' + e.message); });
+    },
+
+    /* Get the address to actually send to — verified only. cb(email|null). */
+    requireVerifiedEmail: function (cb) {
+        var me = this;
+        var field = me.win && me.win.down('#emailField');
+        var typed = field ? (field.getValue() || '').trim().toLowerCase() : '';
+        var verified = me.getVerifiedEmail();
+        if (typed && typed === verified) { cb(verified); return; }
+        if (typed && typed.indexOf('@') > 0) {
+            // new address — confirm it first, then use it
+            me.confirmEmail(function (v) { cb(v); });
+            return;
+        }
+        Ext.Msg.prompt('Email', 'Enter the email to receive reports (confirmed once):',
+            function (btn, val) {
+                if (btn !== 'ok' || !val) { return; }
+                if (field) { field.setValue(val.trim()); }
+                me.confirmEmail(function (v) { cb(v); });
+            });
     },
 
     emailReport: function () {
         var me = this;
-        var field = me.win && me.win.down('#emailField');
-        var saved = field ? (field.getValue() || '').trim() : '';
-        Ext.Msg.prompt('Email report', 'Send the fleet report to email:', function (btn, val) {
-            if (btn !== 'ok' || !val) { return; }
-            me.saveEmail(val);
-            if (field) { field.setValue(val.trim()); }
+        me.requireVerifiedEmail(function (to) {
+            if (!to) { return; }
             me.gatherContext(function (ctx) {
-                me.history.push({ who: 'ai', text: '⏳ Generating and sending the report…' });
+                me.history.push({ who: 'ai', text: '⏳ Generating and sending the report to ' + to + '…' });
                 me.renderHistory();
                 fetch(me.config.serverUrl.replace(/\/+$/, '') + '/report', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ context: ctx, email: val.trim(), subject: 'Pilot Fleet Report' })
+                    body: JSON.stringify({ context: ctx, email: to, subject: 'Pilot Fleet Report' })
                 })
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
@@ -198,24 +288,16 @@ Ext.define('Store.ai_assistant.Module', {
                         me.renderHistory();
                     });
             });
-        }, me, false, saved);
+        });
     },
 
     /* Email the LAST AI answer as a plain email (no re-generation). */
     emailLastAnswer: function () {
         var me = this;
-        var field = me.win && me.win.down('#emailField');
-        var to = field ? (field.getValue() || '').trim() : '';
-        if (!to) {
-            Ext.Msg.prompt('Email answer', 'Send the last answer to email:', function (btn, val) {
-                if (btn !== 'ok' || !val) { return; }
-                me.saveEmail(val);
-                if (field) { field.setValue(val.trim()); }
-                me._sendLastAnswer(val.trim());
-            });
-            return;
-        }
-        me._sendLastAnswer(to);
+        me.requireVerifiedEmail(function (to) {
+            if (!to) { return; }
+            me._sendLastAnswer(to);
+        });
     },
 
     _sendLastAnswer: function (to) {

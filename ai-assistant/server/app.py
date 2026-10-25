@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import smtplib
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from email.mime.multipart import MIMEMultipart
@@ -121,6 +122,24 @@ class SendRequest(BaseModel):
     email: str
     subject: str = "Pilot AI"
     html: str = ""
+
+
+class EmailCodeRequest(BaseModel):
+    email: str
+
+
+class EmailConfirmRequest(BaseModel):
+    email: str
+    code: str
+
+
+# One-time email confirmation codes: email -> {code, expires_ts, attempts}.
+# In-memory is fine — codes expire in 10 min and a restart just forces a
+# fresh request.
+EMAIL_CODES: dict[str, dict] = {}
+EMAIL_CODES_LOCK = threading.Lock()
+EMAIL_CODE_TTL = 600  # 10 min
+EMAIL_CODE_MAX_ATTEMPTS = 5
 
 
 # Email (SMTP) — reports sent via the owner's taqeeq.ae mailbox, rebranded Pilot.
@@ -568,6 +587,54 @@ def send_email(req: SendRequest):
         (ok if st == "sent" else failed).append(to)
     return {"status": "sent" if ok else ("failed" if not ok else "partial"),
             "sent": ok, "failed": failed}
+
+
+@app.post("/email/request-code")
+def email_request_code(req: EmailCodeRequest):
+    """Email a 6-digit confirmation code to the address (one-time verify)."""
+    email = req.email.strip().lower()
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        return {"error": "invalid email"}
+    code = "%06d" % secrets.randbelow(1000000)
+    with EMAIL_CODES_LOCK:
+        EMAIL_CODES[email] = {
+            "code": code,
+            "expires_ts": time.time() + EMAIL_CODE_TTL,
+            "attempts": 0,
+        }
+    html = (
+        '<div style="font:14px/1.6 Arial,sans-serif;color:#1e293b">'
+        "<p>Your Pilot confirmation code:</p>"
+        '<p style="font-size:26px;letter-spacing:6px;font-weight:bold;margin:12px 0">'
+        + code
+        + "</p><p>Enter it in the Pilot AI Assistant to confirm this email. "
+        "The code expires in 10 minutes.</p></div>"
+    )
+    st = _send_email(email, "Pilot — email confirmation code", html)
+    if st != "sent":
+        return {"status": "failed", "error": st}
+    return {"status": "sent", "email": email}
+
+
+@app.post("/email/confirm")
+def email_confirm(req: EmailConfirmRequest):
+    """Check a confirmation code. On success the address is considered verified."""
+    email = req.email.strip().lower()
+    with EMAIL_CODES_LOCK:
+        rec = EMAIL_CODES.get(email)
+        if not rec:
+            return {"ok": False, "error": "no code requested for this email"}
+        if time.time() > rec["expires_ts"]:
+            EMAIL_CODES.pop(email, None)
+            return {"ok": False, "error": "code expired — request a new one"}
+        rec["attempts"] += 1
+        if rec["attempts"] > EMAIL_CODE_MAX_ATTEMPTS:
+            EMAIL_CODES.pop(email, None)
+            return {"ok": False, "error": "too many attempts — request a new code"}
+        if req.code.strip() != rec["code"]:
+            return {"ok": False, "error": "wrong code"}
+        EMAIL_CODES.pop(email, None)
+    return {"ok": True, "email": email}
 
 
 @app.post("/rta-fines")
