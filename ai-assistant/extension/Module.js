@@ -14,8 +14,8 @@
 Ext.define('Store.ai_assistant.Module', {
     extend: 'Ext.Component',
     extensionName: 'ai_assistant',
-    version: '0.2.0',
-    moduleBuild: '2026-10-23',
+    version: '0.4.0',
+    moduleBuild: '2026-10-25',
 
     DEFAULT_CONFIG: {
         serverUrl: 'https://pilot-ai.zamtek.ae',
@@ -106,11 +106,46 @@ Ext.define('Store.ai_assistant.Module', {
                     },
                     {
                         xtype: 'container',
+                        itemId: 'quickChips',
+                        margin: '0 0 6 0',
+                        html: '<div class="ai-chips">'
+                            + '<button type="button" class="ai-chip" data-q="Fleet summary: totals, moving now, offline">Fleet summary</button>'
+                            + '<button type="button" class="ai-chip" data-q="Who has RTA fines? List plates and amounts.">Who has fines?</button>'
+                            + '<button type="button" class="ai-chip" data-q="Who exceeded the monthly km limit?">Over km limit?</button>'
+                            + '<button type="button" class="ai-chip" data-q="Salik this month: totals per vehicle and top gates.">Salik this month</button>'
+                            + '</div>',
+                        listeners: {
+                            afterrender: function (c) {
+                                c.getEl().on('click', function (e, t) {
+                                    var chip = Ext.fly(t).findParent('.ai-chip', null, true);
+                                    if (!chip) { return; }
+                                    me.win.down('#input').setValue(chip.getAttribute('data-q'));
+                                    me.ask();
+                                });
+                            }
+                        }
+                    },
+                    {
+                        xtype: 'container',
+                        layout: { type: 'hbox', align: 'stretch' },
+                        margin: '0 0 6 0',
+                        items: [
+                            { xtype: 'textfield', itemId: 'emailField', flex: 1,
+                              emptyText: 'Email for reports (saved locally)', value: me.getSavedEmail(),
+                              listeners: { change: function (f, v) { me.saveEmail(v); } } },
+                            { xtype: 'button', itemId: 'emailLastBtn', text: '✉ Email answer', width: 110, margin: '0 0 0 8',
+                              tooltip: 'Email the last AI answer to the address above',
+                              handler: function () { me.emailLastAnswer(); } }
+                        ]
+                    },
+                    {
+                        xtype: 'container',
                         layout: { type: 'hbox', align: 'stretch' },
                         margin: '8 0 0 0',
                         items: [
                             { xtype: 'button', text: 'Send', flex: 1, handler: function () { me.ask(); } },
-                            { xtype: 'button', text: 'Email report', flex: 1, margin: '0 0 0 8', handler: function () { me.emailReport(); } }
+                            { xtype: 'button', text: 'Email report', flex: 1, margin: '0 0 0 8', handler: function () { me.emailReport(); } },
+                            { xtype: 'button', text: 'Admin', width: 70, margin: '0 0 0 8', handler: function () { me.openAdmin(); } }
                         ]
                     }
                 ]
@@ -124,10 +159,24 @@ Ext.define('Store.ai_assistant.Module', {
         });
     },
 
+    getSavedEmail: function () {
+        try { return localStorage.getItem('ai_assistant_email') || ''; } catch (e) { return ''; }
+    },
+
+    saveEmail: function (v) {
+        try {
+            if (v && v.trim()) { localStorage.setItem('ai_assistant_email', v.trim()); }
+        } catch (e) { /* storage blocked */ }
+    },
+
     emailReport: function () {
         var me = this;
+        var field = me.win && me.win.down('#emailField');
+        var saved = field ? (field.getValue() || '').trim() : '';
         Ext.Msg.prompt('Email report', 'Send the fleet report to email:', function (btn, val) {
             if (btn !== 'ok' || !val) { return; }
+            me.saveEmail(val);
+            if (field) { field.setValue(val.trim()); }
             me.gatherContext(function (ctx) {
                 me.history.push({ who: 'ai', text: '⏳ Generating and sending the report…' });
                 me.renderHistory();
@@ -149,7 +198,57 @@ Ext.define('Store.ai_assistant.Module', {
                         me.renderHistory();
                     });
             });
-        });
+        }, me, false, saved);
+    },
+
+    /* Email the LAST AI answer as a plain email (no re-generation). */
+    emailLastAnswer: function () {
+        var me = this;
+        var field = me.win && me.win.down('#emailField');
+        var to = field ? (field.getValue() || '').trim() : '';
+        if (!to) {
+            Ext.Msg.prompt('Email answer', 'Send the last answer to email:', function (btn, val) {
+                if (btn !== 'ok' || !val) { return; }
+                me.saveEmail(val);
+                if (field) { field.setValue(val.trim()); }
+                me._sendLastAnswer(val.trim());
+            });
+            return;
+        }
+        me._sendLastAnswer(to);
+    },
+
+    _sendLastAnswer: function (to) {
+        var me = this;
+        var last = null;
+        for (var i = me.history.length - 1; i >= 0; i--) {
+            if (me.history[i].who === 'ai' && me.history[i].text.indexOf('⏳') !== 0) {
+                last = me.history[i];
+                break;
+            }
+        }
+        if (!last) {
+            me.appendMessage('ai', '❌ No AI answer to email yet.');
+            return;
+        }
+        var htmlBody = '<div style="font:14px/1.6 Arial,sans-serif;color:#1e293b">'
+            + Ext.htmlEncode(last.text).replace(/\n/g, '<br>')
+            + '<hr style="border:0;border-top:1px solid #e2e8f0;margin:16px 0">'
+            + '<span style="color:#94a3b8;font-size:12px">Sent from Pilot AI Assistant</span></div>';
+        me.appendMessage('ai', '⏳ Sending answer to ' + to + '…');
+        fetch(me.config.serverUrl.replace(/\/+$/, '') + '/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: to, subject: 'Pilot AI — answer', html: htmlBody })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var msg = d.status === 'sent'
+                    ? ('✅ Answer emailed to ' + (d.sent || [to]).join(', '))
+                    : ('❌ ' + (d.error || d.status || 'error'));
+                me.appendMessage('ai', msg);
+            })
+            .catch(function (e) { me.appendMessage('ai', '❌ Send error: ' + e.message); });
     },
 
     toggleChat: function () {
@@ -168,11 +267,16 @@ Ext.define('Store.ai_assistant.Module', {
         if (!q) { return; }
         input.setValue('');
         this.appendMessage('user', q);
-        this.appendMessage('ai', '…собираю данные по аккаунту…');
+        this.appendMessage('ai', '…gathering account data…');
 
         this.gatherContext(function (ctx) {
-            me.postToServer(q, ctx, function (answer) {
-                me.replaceLast('ai', answer);
+            me.postToServer(q, ctx, function (res) {
+                var msg = me.history[me.history.length - 1];
+                if (msg && msg.who === 'ai') {
+                    msg.text = res.answer;
+                    msg.actions = res.actions || [];
+                    me.renderHistory();
+                }
             });
         });
     },
@@ -213,17 +317,29 @@ Ext.define('Store.ai_assistant.Module', {
                         list.forEach(function (v) {
                             var p = me.extractPlate(v.vehiclenumber);
                             if (!p) { return; }
+                            var st = v.status;
+                            var statusText = 'offline';
+                            if (st) {
+                                statusText = (st.moving || st.speed > 0) ? 'moving'
+                                    : (st.lat && st.lon) ? 'parked' : 'offline';
+                            }
                             vehicles.push({
                                 agentid: v.agentid || v.veh_id || v.imei,
                                 plate: p.clean,
                                 plateRaw: v.vehiclenumber,
+                                name: v.name || v.model || '',
                                 folder: v.folder,
                                 model: v.model,
                                 odometerKm: v.current_mileage,
+                                status: statusText,
                                 type: v.type
                             });
                         });
                         out.vehicleCount = vehicles.length;
+                        var moving = vehicles.filter(function (x) { return x.status === 'moving'; }).length;
+                        var parked = vehicles.filter(function (x) { return x.status === 'parked'; }).length;
+                        var offline = vehicles.filter(function (x) { return x.status === 'offline'; }).length;
+                        out.liveStatus = { moving: moving, parked: parked, offline: offline };
                         out.vehicles = vehicles.slice(0, cap);
                         res();
                     })
@@ -367,14 +483,20 @@ Ext.define('Store.ai_assistant.Module', {
     },
 
     postToServer: function (q, ctx, cb) {
+        var payload = { question: q, context: ctx };
+        // Admin mode: let the AI use the server-side admin tools.
+        if (this.adminSid) { payload.sid = this.adminSid; payload.admin = true; }
         fetch(this.config.serverUrl.replace(/\/+$/, '') + '/ask', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: q, context: ctx })
+            body: JSON.stringify(payload)
         })
             .then(function (r) { return r.json(); })
-            .then(function (d) { cb((d && (d.answer || d.error)) || 'Нет ответа.'); })
-            .catch(function (e) { cb('Ошибка соединения с AI-сервером: ' + e.message); });
+            .then(function (d) {
+                if (d && d.error) { cb({ answer: d.error, actions: [] }); return; }
+                cb({ answer: (d && d.answer) || 'No answer.', actions: (d && d.actions) || [] });
+            })
+            .catch(function (e) { cb({ answer: 'AI server connection error: ' + e.message, actions: [] }); });
     },
 
     appendMessage: function (who, text) {
@@ -390,12 +512,329 @@ Ext.define('Store.ai_assistant.Module', {
 
     renderHistory: function () {
         if (!this.historyEl) { return; }
-        var html = this.history.map(function (m) {
+        var me = this;
+        var html = this.history.map(function (m, mi) {
             var cls = m.who === 'user' ? 'ai-msg-user' : 'ai-msg-ai';
             var body = Ext.htmlEncode(m.text).replace(/\n/g, '<br>');
-            return '<div class="' + cls + '">' + body + '</div>';
+            var actionsHtml = '';
+            (m.actions || []).forEach(function (a, ai) {
+                if (a.type && a.type.indexOf('admin_') === 0) { return; } // server-executed
+                var label = Ext.htmlEncode(a.label || a.type);
+                actionsHtml += ' <button type="button" class="ai-act-btn"'
+                    + ' data-mi="' + mi + '" data-ai="' + ai + '">⚡ ' + label + '</button>';
+            });
+            return '<div class="' + cls + '">' + body + actionsHtml + '</div>';
         }).join('');
         this.historyEl.update('<div class="ai-chat-history">' + html + '</div>');
         this.historyEl.scroll('b', 100000, false);
-    }
+        if (!this._clickBound) {
+            this._clickBound = true;
+            this.historyEl.on('click', function (e, t) {
+                var btn = Ext.fly(t).findParent('.ai-act-btn', null, true);
+                if (!btn) { return; }
+                var mi = parseInt(btn.getAttribute('data-mi'), 10);
+                var ai = parseInt(btn.getAttribute('data-ai'), 10);
+                var msg = me.history[mi];
+                if (!msg || !msg.actions || !msg.actions[ai]) { return; }
+                btn.disabled = true;
+                me.executeAction(msg.actions[ai], function (result) {
+                    btn.disabled = false;
+                    me.appendMessage('ai', result);
+                });
+            });
+        }
+    },
+
+    /* Run a proposed action against Pilot API v3 (same-origin, session cookie). */
+    executeAction: function (a, cb) {
+        var me = this;
+        var base = '/api/v3';
+        var qs = function (obj) {
+            var parts = [];
+            Object.keys(obj || {}).forEach(function (k) {
+                if (obj[k] != null && obj[k] !== '') {
+                    parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
+                }
+            });
+            return parts.length ? '?' + parts.join('&') : '';
+        };
+        var key = a.agent_id ? { agent_id: a.agent_id } : { imei: a.imei };
+
+        var done = function (okText, failText) {
+            return function (r) {
+                r.json().then(function (d) {
+                    cb(r.ok
+                        ? (okText + ((d && d.error) ? ' (' + d.error + ')' : ''))
+                        : (failText + ' HTTP ' + r.status + (d && d.error ? ' — ' + d.error : '')));
+                }).catch(function () {
+                    cb(r.ok ? okText : (failText + ' HTTP ' + r.status));
+                });
+            };
+        };
+
+        try {
+            if (a.type === 'send_command') {
+                fetch(base + '/vehicles/commands' + qs(key), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ template_name: a.template_name, params: a.params || {} })
+                }).then(done('✅ Command sent.', '❌ Command failed:'));
+            } else if (a.type === 'share_link') {
+                var sq = Ext.apply({}, key, { max_duration: a.max_duration });
+                fetch(base + '/vehicles/share-link' + qs(sq), { credentials: 'include' })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+                    .then(function (res) {
+                        var link = (res.d && (res.d.data || res.d).link) || (res.d && res.d.link) || null;
+                        if (res.ok && link) {
+                            var win = Ext.create('Ext.window.Window', {
+                                title: 'Tracking link', width: 460, autoHeight: true,
+                                modal: true, closable: true,
+                                html: '<div style="padding:12px;font-size:12px;">'
+                                    + '<b>Tracking link:</b><br>'
+                                    + '<input type="text" style="width:100%" value="' + Ext.htmlEncode(link) + '" onclick="this.select()">'
+                                    + '<br><br><i>The link expires after the set duration.</i></div>'
+                            });
+                            win.show();
+                            cb('✅ Link created.');
+                        } else {
+                            cb('❌ Link failed: ' + JSON.stringify(res.d));
+                        }
+                    })
+                    .catch(function (e) { cb('❌ Link failed: ' + e.message); });
+            } else if (a.type === 'add_fuel') {
+                var body = {
+                    card_num: a.card_num, operation: a.operation, unixtimestamp: a.unixtimestamp,
+                    place: a.place, azs: a.azs, liters: a.liters, fuel: a.fuel,
+                    price: a.price, sum: a.sum
+                };
+                Object.keys(a).forEach(function (k) {
+                    if (['type', 'label', 'card_num', 'operation', 'unixtimestamp', 'place', 'azs', 'liters', 'fuel', 'price', 'sum'].indexOf(k) === -1) {
+                        body[k] = a[k];
+                    }
+                });
+                fetch(base + '/fuel/transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                }).then(done('✅ Fuel transaction saved.', '❌ Fuel transaction failed:'));
+            } else if (a.type === 'driver_bind') {
+                var bq = Ext.apply({}, key, { driver_id: a.driver_id, ibutton: a.ibutton });
+                fetch(base + '/vehicles/driver-bind' + qs(bq), { method: 'POST', credentials: 'include' })
+                    .then(done('✅ Driver bound.', '❌ Driver bind failed:'));
+            } else {
+                cb('❌ Unknown action type: ' + a.type);
+            }
+        } catch (err) {
+            cb('❌ Action error: ' + err.message);
+        }
+    },
+
+    /* ------------------------------------------------------------------ admin */
+
+    openAdmin: function () {
+        var me = this;
+        if (me.adminWin) { me.adminWin.show(); return; }
+
+        var status = Ext.create('Ext.form.Label', { itemId: 'adminStatus', text: ' ', margin: '4 0 0 0' });
+        var searchField = Ext.create('Ext.form.field.Text', {
+            itemId: 'adminSearch', flex: 1, emptyText: 'Search login / company',
+            enableKeyEvents: true,
+            listeners: {
+                specialkey: function (f, e) { if (e.getKey() === e.ENTER) { me.adminSearch(); } }
+            }
+        });
+        var searchBtn = Ext.create('Ext.button.Button', {
+            text: 'Search', width: 70, margin: '0 0 0 8',
+            handler: function () { me.adminSearch(); }
+        });
+        var loginField = Ext.create('Ext.form.field.Text', {
+            itemId: 'adminLogin', fieldLabel: 'Admin login', labelWidth: 90, margin: '6 0 0 0'
+        });
+        var passField = Ext.create('Ext.form.field.Text', {
+            itemId: 'adminPass', fieldLabel: 'Password', labelWidth: 90, inputType: 'password', margin: '6 0 0 0'
+        });
+        var loginBtn = Ext.create('Ext.button.Button', {
+            text: 'Login', margin: '8 0 0 0',
+            handler: function () { me.adminLogin(loginField.getValue(), passField.getValue()); }
+        });
+
+        var searchBar = Ext.create('Ext.container.Container', {
+            itemId: 'searchBar', layout: { type: 'hbox', align: 'stretch' },
+            items: [searchField, searchBtn], margin: '0 0 6 0', hidden: true
+        });
+        var loginPanel = Ext.create('Ext.container.Container', {
+            itemId: 'loginPanel', items: [loginField, passField, loginBtn], hidden: true
+        });
+        var body = Ext.create('Ext.container.Container', {
+            itemId: 'adminBody', autoScroll: true, style: { overflowY: 'auto' }
+        });
+
+        me.adminWin = Ext.create('Ext.window.Window', {
+            title: 'Admin — accounts (master travel)',
+            width: 640, height: 520, modal: true, closable: true, layout: 'fit',
+            items: [{
+                xtype: 'container',
+                padding: 10,
+                layout: { type: 'vbox', align: 'stretch' },
+                items: [searchBar, loginPanel, status, body]
+            }],
+            listeners: {
+                destroy: function () { me.adminWin = null; me.adminSid = null; }
+            }
+        });
+        me.adminWin.show();
+
+        body.on('click', function (e, t) {
+            var btn = Ext.fly(t).findParent('.ai-admin-travel', null, true);
+            if (!btn) { return; }
+            var idx = parseInt(btn.getAttribute('data-idx'), 10);
+            var row = (me.adminRows || [])[idx];
+            if (!row) { return; }
+            btn.disabled = true;
+            me.adminTravel(row, function (msg) {
+                btn.disabled = false;
+                status.setText(msg, false);
+            });
+        });
+
+        me.adminCheckSession();
+    },
+
+    adminCheckSession: function () {
+        var me = this;
+        if (!me.adminSid) {
+            me.adminTryLogin('', '', function () {
+                if (me.adminSid) { me.adminLoadAccounts(); }
+            });
+        } else {
+            me.adminLoadAccounts();
+        }
+    },
+
+    adminTryLogin: function (username, password, done) {
+        var me = this;
+        var loginPanel = me.adminWin.down('#loginPanel');
+        var searchBar = me.adminWin.down('#searchBar');
+        var status = me.adminWin.down('#adminStatus');
+
+        fetch(this.config.serverUrl.replace(/\/+$/, '') + '/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, password: password })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d && d.ok && d.sid) {
+                    me.adminSid = d.sid;
+                    loginPanel.hide();
+                    searchBar.show();
+                    status.setText('Logged in as admin.', false);
+                    me.adminLoadAccounts();
+                } else {
+                    me.adminSid = null;
+                    status.setText((d && d.error) ? 'Login failed: ' + d.error : 'Login required (server has no admin creds).', false);
+                    loginPanel.show();
+                    searchBar.hide();
+                }
+                if (done) { done(); }
+            })
+            .catch(function (e) {
+                status.setText('Server error: ' + e.message, false);
+                loginPanel.show();
+                if (done) { done(); }
+            });
+    },
+
+    adminLogin: function (username, password) {
+        this.adminTryLogin(username, password);
+    },
+
+    adminSearch: function () {
+        this.adminLoadAccounts(this.adminWin.down('#adminSearch').getValue());
+    },
+
+    adminLoadAccounts: function (search) {
+        var me = this;
+        var status = me.adminWin.down('#adminStatus');
+        var body = me.adminWin.down('#adminBody');
+        if (!me.adminSid) { return; }
+        status.setText('Loading accounts…', false);
+        fetch(this.config.serverUrl.replace(/\/+$/, '') + '/admin/accounts?sid=' + encodeURIComponent(me.adminSid) + '&search=' + encodeURIComponent(search || ''))
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d || !d.ok) {
+                    status.setText((d && d.error) || 'Accounts load failed.', false);
+                    return;
+                }
+                me.adminRows = d.rows || [];
+                var rowsHtml = (d.rows || []).map(function (row, i) {
+                    var name = row.login || row.username || row.email || ('#' + (row.id || i));
+                    var org = row.org_name || row.organization || row.company || row.name || '';
+                    var extra = row.email && row.email !== name ? ' · ' + Ext.htmlEncode(row.email) : '';
+                    return '<div class="ai-admin-row">'
+                        + '<button type="button" class="ai-admin-travel" data-idx="' + i + '">Travel</button>'
+                        + '<b>' + Ext.htmlEncode(name) + '</b>'
+                        + (org ? '<br>' + Ext.htmlEncode(org) : '')
+                        + extra
+                        + '</div>';
+                }).join('');
+                body.update(rowsHtml || '<div style="padding:12px;color:#64748b;">No accounts found.</div>');
+                status.setText('Accounts: ' + (d.total != null ? d.total : (d.rows || []).length) + ' total, showing ' + (d.rows || []).length + '.', false);
+            })
+            .catch(function (e) {
+                status.setText('Server error: ' + e.message, false);
+            });
+    },
+
+    adminTravel: function (row, done) {
+        var me = this;
+        var status = me.adminWin.down('#adminStatus');
+        var id = row.id;
+        status.setText('Traveling into account…', false);
+        fetch(this.config.serverUrl.replace(/\/+$/, '') + '/admin/travel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sid: me.adminSid, account_id: id })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d || !d.ok) {
+                    status.setText((d && d.error) || 'Travel failed.', false);
+                    if (done) { done('❌ ' + ((d && d.error) || 'Travel failed.')); }
+                    return;
+                }
+                // Open the account UI in a new tab via the admin panel's own form.
+                if (d.form && d.form.url) {
+                    var f = d.form;
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = f.url;
+                    form.target = '_blank';
+                    var add = function (k, v) {
+                        var inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = k;
+                        inp.value = v == null ? '' : String(v);
+                        form.appendChild(inp);
+                    };
+                    add('username', f.username);
+                    add('role', f.role);
+                    add('id', f.id);
+                    add('token', f.token);
+                    add('sec_token', f.sec_token);
+                    document.body.appendChild(form);
+                    form.submit();
+                    form.remove();
+                }
+                me.adminTraveled = { username: d.username, account_id: id };
+                status.setText('Traveled as ' + d.username + ' (#' + id + '). AI can now read this account\'s data.', false);
+                if (done) { done('✅ Traveled as ' + d.username + ' — ask the AI about this account.'); }
+            })
+            .catch(function (e) {
+                status.setText('Server error: ' + e.message, false);
+                if (done) { done('❌ ' + e.message); }
+            });
+    },
 });

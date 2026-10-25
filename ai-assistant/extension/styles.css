@@ -9,3 +9,29 @@
   border-radius: 12px 12px 12px 2px;
   padding: 8px 11px; margin: 6px 40px 6px 0; white-space: pre-wrap; word-break: break-word;
 }
+.ai-msg-ai .ai-act-btn {
+  margin: 8px 6px 0 0;
+  padding: 4px 10px;
+  font: 12px -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #0a67a0; color: #fff;
+  border: 0; border-radius: 10px; cursor: pointer;
+}
+.ai-msg-ai .ai-act-btn:hover { background: #085a8c; }
+.ai-msg-ai .ai-act-btn:disabled { background: #94a3b8; cursor: default; }
+.ai-admin-row {
+  border-bottom: 1px solid #e2e8f0; padding: 6px 8px; cursor: default;
+  font: 13px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.ai-admin-row .ai-admin-travel {
+  float: right; padding: 2px 12px; font-size: 12px;
+  background: #0a67a0; color: #fff; border: 0; border-radius: 8px; cursor: pointer;
+}
+.ai-admin-row .ai-admin-travel:hover { background: #085a8c; }
+.ai-chips { padding: 0 2px; }
+.ai-chips .ai-chip {
+  display: inline-block; margin: 2px 4px 2px 0;
+  padding: 3px 10px; font: 12px -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #e8f1f8; color: #0a67a0;
+  border: 1px solid #cfe3f2; border-radius: 12px; cursor: pointer;
+}
+.ai-chips .ai-chip:hover { background: #0a67a0; color: #fff; }
