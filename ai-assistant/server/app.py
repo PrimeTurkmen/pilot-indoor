@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 import httpx
 
@@ -30,30 +31,37 @@ KEY = os.environ.get("DEEPSEEK_" + "API_KEY", "")
 BASE = os.environ.get("DEEPSEEK_" + "BASE_URL", "https://api.deepseek.com")
 MODEL = os.environ.get("DEEPSEEK_" + "MODEL", "deepseek-chat")
 
-# The AI is read-only itself but can PROPOSE concrete actions (commands,
-# share links, fuel entries, driver bind) which the extension executes
-# client-side with the user's confirmation. Action proposals are strict:
-# only when explicitly asked, with real values from the context.
+# The AI is a TIER-1 SUPPORT AGENT embedded in Pilot: it explains, guides,
+# reads the account data and proposes safe actions. Tier-2 (destructive or
+# sensitive changes) is NOT done directly — it must be confirmed by the
+# operator; the AI offers escalation via WhatsApp/Telegram (UI buttons).
 SYSTEM = (
-    "You are a fleet data reporter and assistant for a car-rental company. "
+    "You are the AI support agent of a GPS/fleet telematics company, embedded "
+    "in the Pilot tracking app as a chat. You are tier-1 support: explain how "
+    "to use Pilot, read the account's data, answer questions about the fleet, "
+    "fines, tolls, trips and contracts, and guide the user step by step like "
+    "an experienced operator. You know Pilot deeply (vehicles, tracks, "
+    "reports, geofences, drivers, fuel, commands). "
     "You answer ONLY with concrete facts and numbers taken from the JSON "
-    "context the user sends. You have NO admin panel and cannot perform any "
-    "action yourself — the UI executes actions for you after user confirmation, "
-    "so you may PROPOSE them. "
-    "Compare numbers where the context allows (e.g. monthlyKm vs mileageLimitKm), "
-    "and report exactly which plates are over the limit. "
-    "The context JSON contains: vehicles (plate, name, model, folder, odometerKm, "
-    "status moving/parked/offline, monthlyKm, overLimit, salikConnected, salikTolls), "
-    "liveStatus (moving/parked/offline counts), vehicleCount, mileageLimitKm, "
+    "context the user sends. Never invent numbers; if the context lacks a "
+    "requested figure, say exactly that and name what is missing. "
+    "The context JSON contains: vehicles (plate, name, model, folder, "
+    "odometerKm, status moving/parked/offline, periodKm, salikConnected, "
+    "salikTolls), liveStatus (moving/parked/offline counts), vehicleCount, "
     "fines (plate, type, amount, date), salik (plate, date, amount, gate), "
-    "contracts (rental contracts), overLimitVehicles, overLimitCount. "
-    "If the context lacks a requested figure, say exactly that and name what is "
-    "missing. Answer in ENGLISH by default; if the user writes in another "
-    "language (e.g. Russian), answer in that language. Be short, factual, "
-    "table-like where useful. "
-    "\n\nACTIONS: only when the user explicitly asks you to DO something "
-    "(send a command, create a share link, add a fuel transaction, bind a driver), "
-    "append this exact block to your answer:\n"
+    "contracts, and a company profile describing this client. "
+    "TONE: friendly, professional, short, table-like where useful. Answer in "
+    "ENGLISH by default; if the user writes in another language (e.g. "
+    "Russian), answer in that language. "
+    "TIERS: (1) informational questions, explanations, how-to, reading data, "
+    "proposing SAFE operational actions — you handle these directly. "
+    "(2) Anything that changes data or can cost money (block/unblock a car, "
+    "edit vehicles, refunds, deleting records, fuel corrections) — do NOT "
+    "execute or promise execution: say this needs operator confirmation and "
+    "offer to escalate (the UI has WhatsApp/Telegram buttons — mention them). "
+    "\n\nACTIONS: only for SAFE operational requests the user explicitly asks "
+    "for (send a command, create a share link, add a fuel transaction, bind a "
+    "driver), append this exact block to your answer:\n"
     "<<<ACTIONS>>>\n"
     "[{\"type\":\"send_command\",\"label\":\"...\",\"agent_id\":123,\"template_name\":\"...\",\"params\":{}}]\n"
     "<<<END_ACTIONS>>>\n"
@@ -63,10 +71,10 @@ SYSTEM = (
     "- add_fuel: card_num, operation, unixtimestamp, place, azs, liters, fuel, price, sum, label\n"
     "- driver_bind: agent_id OR imei, driver_id OR ibutton, label\n"
     "Rules: propose ONLY actions the user explicitly asked for. Never propose "
-    "destructive commands unless asked. Use the real agent_id/imei from the "
-    "context. If it is ambiguous which vehicle, ask instead of guessing. If the "
-    "request is informational, omit the block entirely. The block must be the "
-    "last thing in your answer, and the JSON must be one valid array."
+    "destructive commands. Use the real agent_id/imei from the context. If it "
+    "is ambiguous which vehicle, ask instead of guessing. If the request is "
+    "informational, omit the block entirely. The block must be the last thing "
+    "in your answer, and the JSON must be one valid array."
 )
 
 
@@ -115,6 +123,7 @@ class ReportRequest(BaseModel):
     from_date: str = ""
     to_date: str = ""
     plates: list[str] = []
+    conversation: list = []  # chat history [{who,text}] — report answers what was asked
 
 
 class SendRequest(BaseModel):
@@ -131,6 +140,17 @@ class EmailCodeRequest(BaseModel):
 class EmailConfirmRequest(BaseModel):
     email: str
     code: str
+
+
+class TtsRequest(BaseModel):
+    text: str
+    voice: str = ""  # optional Fish Audio reference_id override
+
+
+# Fish Audio TTS (the owner's subscription): api.fish.audio/v1/tts
+FISH_KEY = os.environ.get("FISH_AUDIO_API_KEY", "")
+FISH_VOICE = os.environ.get("FISH_AUDIO_VOICE", "")
+FISH_MODEL = os.environ.get("FISH_AUDIO_MODEL", "fish-speech-1.5")
 
 
 # One-time email confirmation codes: email -> {code, expires_ts, attempts}.
@@ -150,12 +170,17 @@ SMTP_PASS = os.environ.get("SMTP_PASS", "")
 SMTP_FROM_NAME = os.environ.get("SMTP_FROM_NAME", "Pilot Fleet Reports")
 
 REPORT_SYSTEM = (
-    "You generate a professional fleet report in ENGLISH from the JSON context. "
+    "You generate a professional support/fleet report in ENGLISH from the JSON "
+    "context and the conversation the user had with the AI assistant. "
     "Output clean HTML (no markdown fences). Structure: "
-    "1) Summary — total vehicles, total RTA fines (AED), total Salik (AED), over-limit vehicles. "
-    "2) Per-vehicle table: plate (RTA), name from Pilot (plateRaw), agent ID, model, odometer (km), "
-    "RTA fines (count + amount AED), Salik (amount AED for the period + has tag), monthly km vs limit. "
+    "1) Summary — total vehicles, total RTA fines (AED), total Salik (AED), "
+    "moving/parked/offline counts. "
+    "2) Per-vehicle table: plate (RTA), name from Pilot, agent ID, model, "
+    "odometer (km), RTA fines (count + amount AED), Salik (amount AED for the "
+    "period), km driven in the selected period. "
     "3) Salik trips breakdown for the period — per vehicle: date, gate, amount AED. "
+    "4) Answers to every question asked in the conversation (quote the question, "
+    "then the factual answer). "
     "Use only facts from the context, never invent numbers. "
     "Footer 'Generated by Pilot Fleet Reports'."
 )
@@ -191,6 +216,23 @@ _load_cache()
 # from customers.salik.ae, so the Mac/Parrot pulls and uploads the snapshot here).
 SALIK_CACHE = os.environ.get("SALIK_CACHE", "/home/ceo/pilot-ai/salik/cache.json")
 
+# Company profiles: one MD file per client with everything the AI should know
+# about the engagement (who they are, fleet, special agreements, support notes).
+# The extension sends context.company = <key>; the server loads
+# <dir>/<key>.md and appends it to the system prompt.
+COMPANY_DIR = os.environ.get("COMPANY_PROFILES_DIR", "/home/ceo/pilot-ai/server/company_profiles")
+
+
+def load_company_profile(key: str) -> str:
+    key = re.sub(r"[^A-Za-z0-9_-]", "", str(key or ""))
+    if not key:
+        return ""
+    try:
+        with open(os.path.join(COMPANY_DIR, key + ".md"), "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except Exception:
+        return ""
+
 
 @app.get("/health")
 def health():
@@ -219,6 +261,11 @@ async def ask(req: Ask):
         + req.question
     )
     system = SYSTEM
+    profile = ""
+    if isinstance(req.context, dict):
+        profile = load_company_profile(req.context.get("company") or "")
+    if profile:
+        system += ("\n\nABOUT THIS COMPANY (the client you are supporting):\n" + profile)
     if req.admin and req.sid:
         session = await admin_session(req.sid)
         if session.get("logged_in"):
@@ -542,10 +589,20 @@ async def report(req: ReportRequest):
         if ctx.get("salik"):
             ctx["salik"] = [s for s in ctx["salik"] if in_range(s.get("date"))]
 
+    conv_lines = []
+    for item in (req.conversation or [])[-40:]:
+        if isinstance(item, dict):
+            who = "User" if item.get("who") == "user" else "Assistant"
+            conv_lines.append(f"{who}: {item.get('text', '')}")
+        else:
+            conv_lines.append(str(item))
+    conversation = "\n".join(conv_lines)
     user_msg = (
         "Контекст (JSON):\n"
         + json.dumps(ctx, ensure_ascii=False)
-        + ("\n\nПериод: " + req.from_date + " → " + req.to_date if req.from_date or req.to_date else "")
+        + (("\n\nПериод: " + req.from_date + " → " + req.to_date) if req.from_date or req.to_date else "")
+        + (("\n\nРазговор клиента с ассистентом (ответь на каждый вопрос):\n" + conversation)
+           if conversation else "")
         + "\n\nСформируй отчёт."
     )
     payload = {
@@ -635,6 +692,37 @@ def email_confirm(req: EmailConfirmRequest):
             return {"ok": False, "error": "wrong code"}
         EMAIL_CODES.pop(email, None)
     return {"ok": True, "email": email}
+
+
+@app.post("/tts")
+async def tts(req: TtsRequest):
+    """Text-to-speech via Fish Audio (owner's subscription). Returns audio/mpeg."""
+    if not FISH_KEY:
+        return JSONResponse({"error": "TTS not configured (FISH_AUDIO_API_KEY)"}, status_code=503)
+    text = (req.text or "").strip()
+    if not text:
+        return JSONResponse({"error": "empty text"}, status_code=400)
+    payload = {
+        "text": text[:2000],
+        "format": "mp3",
+    }
+    if req.voice or FISH_VOICE:
+        payload["reference_id"] = req.voice or FISH_VOICE
+    else:
+        payload["model"] = FISH_MODEL
+    try:
+        async with httpx.AsyncClient(timeout=60) as client:
+            r = await client.post(
+                "https://api.fish.audio/v1/tts",
+                json=payload,
+                headers={"Authorization": "Bearer " + FISH_KEY},
+            )
+            if r.status_code != 200:
+                return JSONResponse({"error": f"fish.audio HTTP {r.status_code}: {r.text[:200]}"},
+                                    status_code=502)
+            return Response(content=r.content, media_type="audio/mpeg")
+    except Exception as exc:  # noqa: BLE001
+        return JSONResponse({"error": "TTS error: " + str(exc)}, status_code=502)
 
 
 @app.post("/rta-fines")

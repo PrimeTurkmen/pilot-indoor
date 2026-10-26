@@ -21,11 +21,17 @@ Ext.define('Store.ai_assistant.Module', {
         serverUrl: 'https://pilot-ai.zamtek.ae',
         model: 'deepseek-chat',
         contextMaxVehicles: 300,
-        mileageLimitKm: 4500,        // free km/month, rest billed
+        company: 'rma',               // key of the company profile MD on the server
+        periodDays: 30,               // trips/salik reporting window
         gatherVehicles: true,
         gatherFines: true,
         gatherContracts: true,
-        gatherTrips: true            // current-month km per vehicle
+        gatherTrips: true,            // period km per vehicle
+        ttsEnabled: false,            // Fish Audio voice read-out
+        escalation: {
+            whatsapp: '',             // operator WhatsApp number (digits)
+            telegram: ''              // operator Telegram handle (with or without @)
+        }
     },
 
     initModule: function (main, online) {
@@ -69,11 +75,12 @@ Ext.define('Store.ai_assistant.Module', {
         var me = this;
         this.history = [];
         this.historyEl = null;
+        this._audio = null;
 
         this.win = Ext.create('Ext.window.Window', {
             title: 'AI Assistant',
-            width: 460,
-            height: 580,
+            width: 480,
+            height: 660,
             layout: 'fit',
             closable: true,
             closeAction: 'hide',
@@ -92,8 +99,8 @@ Ext.define('Store.ai_assistant.Module', {
                     {
                         xtype: 'textarea',
                         itemId: 'input',
-                        height: 72,
-                        emptyText: 'Ask: how many vehicles? who exceeded 4500 km? who has fines?',
+                        height: 64,
+                        emptyText: 'Ask anything about the fleet…',
                         enableKeyEvents: true,
                         listeners: {
                             specialkey: function (f, e) {
@@ -107,12 +114,12 @@ Ext.define('Store.ai_assistant.Module', {
                     {
                         xtype: 'container',
                         itemId: 'quickChips',
-                        margin: '0 0 6 0',
+                        margin: '6 0 4 0',
                         html: '<div class="ai-chips">'
                             + '<button type="button" class="ai-chip" data-q="Fleet summary: totals, moving now, offline">Fleet summary</button>'
                             + '<button type="button" class="ai-chip" data-q="Who has RTA fines? List plates and amounts.">Who has fines?</button>'
-                            + '<button type="button" class="ai-chip" data-q="Who exceeded the monthly km limit?">Over km limit?</button>'
-                            + '<button type="button" class="ai-chip" data-q="Salik this month: totals per vehicle and top gates.">Salik this month</button>'
+                            + '<button type="button" class="ai-chip" data-q="Trips in the selected period: km and duration per vehicle.">Trips in period</button>'
+                            + '<button type="button" class="ai-chip" data-q="Salik in the period: totals per vehicle and top gates.">Salik this period</button>'
                             + '</div>',
                         listeners: {
                             afterrender: function (c) {
@@ -128,29 +135,39 @@ Ext.define('Store.ai_assistant.Module', {
                     {
                         xtype: 'container',
                         layout: { type: 'hbox', align: 'stretch' },
-                        margin: '0 0 6 0',
+                        margin: '6 0 0 0',
                         items: [
-                            { xtype: 'textfield', itemId: 'emailField', flex: 1,
-                              emptyText: 'Email for reports — confirm once', value: me.getVerifiedEmail(),
-                              enableKeyEvents: true,
-                              listeners: {
-                                  change: function (f, v) { me.emailChanged(v); }
-                              } },
-                            { xtype: 'button', itemId: 'emailConfirmBtn', text: 'Confirm', width: 74, margin: '0 0 0 8',
-                              handler: function () { me.confirmEmail(); } },
-                            { xtype: 'button', itemId: 'emailLastBtn', text: '✉ Email answer', width: 104, margin: '0 0 0 8',
-                              tooltip: 'Email the last AI answer to the confirmed address',
-                              handler: function () { me.emailLastAnswer(); } }
+                            { xtype: 'button', text: 'Send', flex: 1, handler: function () { me.ask(); } }
                         ]
                     },
+                    /* --- report bar: email + ONE send button (bottom) --- */
+                    {
+                        xtype: 'container',
+                        layout: { type: 'hbox', align: 'stretch' },
+                        margin: '10 0 0 0',
+                        items: [
+                            { xtype: 'textfield', itemId: 'emailField', flex: 1,
+                              emptyText: 'Email to receive the full report', value: me.getVerifiedEmail(),
+                              listeners: { change: function (f, v) { me.emailChanged(v); } } },
+                            { xtype: 'button', itemId: 'emailConfirmBtn', text: 'Confirm', width: 70, margin: '0 0 0 8',
+                              handler: function () { me.confirmEmail(); } },
+                            { xtype: 'button', itemId: 'sendReportBtn', text: 'Send report', width: 92, margin: '0 0 0 8',
+                              handler: function () { me.sendReport(); } }
+                        ]
+                    },
+                    /* --- escalation bar --- */
                     {
                         xtype: 'container',
                         layout: { type: 'hbox', align: 'stretch' },
                         margin: '8 0 0 0',
                         items: [
-                            { xtype: 'button', text: 'Send', flex: 1, handler: function () { me.ask(); } },
-                            { xtype: 'button', text: 'Email report', flex: 1, margin: '0 0 0 8', handler: function () { me.emailReport(); } },
-                            { xtype: 'button', text: 'Admin', width: 70, margin: '0 0 0 8', handler: function () { me.openAdmin(); } }
+                            { xtype: 'button', text: 'Escalate — WhatsApp', iconCls: 'fa fa-whatsapp',
+                              margin: '0 8 0 0', handler: function () { me.escalate('whatsapp'); } },
+                            { xtype: 'button', text: 'Escalate — Telegram', iconCls: 'fa fa-telegram',
+                              handler: function () { me.escalate('telegram'); } },
+                            '->',
+                            { xtype: 'button', text: 'Admin', width: 64,
+                              handler: function () { me.openAdmin(); } }
                         ]
                     }
                 ]
@@ -160,6 +177,10 @@ Ext.define('Store.ai_assistant.Module', {
                     me.historyEl = me.win.down('#history').getEl();
                     me.renderHistory();
                     me.emailChanged(me.getVerifiedEmail());
+                    if (!me.getVerifiedEmail()) {
+                        me.appendMessage('ai', '⚠️ To start, enter your email below and press Confirm — '
+                            + 'a one-time code will be sent to it. After that I can help you with everything.');
+                    }
                 }
             }
         });
@@ -263,22 +284,26 @@ Ext.define('Store.ai_assistant.Module', {
             });
     },
 
-    emailReport: function () {
+    /* Send the FULL report of the conversation to the confirmed email. */
+    sendReport: function () {
         var me = this;
         me.requireVerifiedEmail(function (to) {
             if (!to) { return; }
+            var conv = me.history
+                .filter(function (m) { return m.text.indexOf('⏳') !== 0 && m.text.indexOf('⚠️') !== 0; })
+                .map(function (m) { return { who: m.who, text: m.text }; });
             me.gatherContext(function (ctx) {
-                me.history.push({ who: 'ai', text: '⏳ Generating and sending the report to ' + to + '…' });
+                me.history.push({ who: 'ai', text: '⏳ Generating the full report and sending it to ' + to + '…' });
                 me.renderHistory();
                 fetch(me.config.serverUrl.replace(/\/+$/, '') + '/report', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ context: ctx, email: to, subject: 'Pilot Fleet Report' })
+                    body: JSON.stringify({ context: ctx, email: to, subject: 'Pilot Fleet Report', conversation: conv })
                 })
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
                         var msg = d.status === 'sent'
-                            ? ('✅ Report sent to ' + d.email)
+                            ? ('✅ Full report sent to ' + d.email)
                             : ('❌ ' + (d.error || d.status || 'error'));
                         me.history.push({ who: 'ai', text: msg });
                         me.renderHistory();
@@ -291,46 +316,34 @@ Ext.define('Store.ai_assistant.Module', {
         });
     },
 
-    /* Email the LAST AI answer as a plain email (no re-generation). */
-    emailLastAnswer: function () {
+    /* Escalate the request straight to the operator via WhatsApp/Telegram.
+       The chat's last user message rides along as prefilled text. */
+    escalate: function (channel) {
         var me = this;
-        me.requireVerifiedEmail(function (to) {
-            if (!to) { return; }
-            me._sendLastAnswer(to);
-        });
-    },
-
-    _sendLastAnswer: function (to) {
-        var me = this;
-        var last = null;
+        var lastQ = '';
         for (var i = me.history.length - 1; i >= 0; i--) {
-            if (me.history[i].who === 'ai' && me.history[i].text.indexOf('⏳') !== 0) {
-                last = me.history[i];
-                break;
+            if (me.history[i].who === 'user') { lastQ = me.history[i].text; break; }
+        }
+        var cfg = me.config.escalation || {};
+        if (channel === 'whatsapp') {
+            var wa = cfg.whatsapp || '';
+            if (!wa) {
+                me.appendMessage('ai', '❌ WhatsApp escalation is not configured. Ask the operator.');
+                return;
             }
+            window.open('https://wa.me/' + wa.replace(/[^0-9]/g, '')
+                + '?text=' + encodeURIComponent('Support request from Pilot AI: ' + lastQ), '_blank');
+        } else {
+            var tg = cfg.telegram || '';
+            if (!tg) {
+                me.appendMessage('ai', '❌ Telegram escalation is not configured. Ask the operator.');
+                return;
+            }
+            window.open('https://t.me/' + tg.replace(/^@/, '')
+                + '?text=' + encodeURIComponent('Support request from Pilot AI: ' + lastQ), '_blank');
         }
-        if (!last) {
-            me.appendMessage('ai', '❌ No AI answer to email yet.');
-            return;
-        }
-        var htmlBody = '<div style="font:14px/1.6 Arial,sans-serif;color:#1e293b">'
-            + Ext.htmlEncode(last.text).replace(/\n/g, '<br>')
-            + '<hr style="border:0;border-top:1px solid #e2e8f0;margin:16px 0">'
-            + '<span style="color:#94a3b8;font-size:12px">Sent from Pilot AI Assistant</span></div>';
-        me.appendMessage('ai', '⏳ Sending answer to ' + to + '…');
-        fetch(me.config.serverUrl.replace(/\/+$/, '') + '/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: to, subject: 'Pilot AI — answer', html: htmlBody })
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-                var msg = d.status === 'sent'
-                    ? ('✅ Answer emailed to ' + (d.sent || [to]).join(', '))
-                    : ('❌ ' + (d.error || d.status || 'error'));
-                me.appendMessage('ai', msg);
-            })
-            .catch(function (e) { me.appendMessage('ai', '❌ Send error: ' + e.message); });
+        me.appendMessage('ai', '📨 Escalated via ' + (channel === 'whatsapp' ? 'WhatsApp' : 'Telegram')
+            + '. The operator will answer you there.');
     },
 
     toggleChat: function () {
@@ -347,6 +360,12 @@ Ext.define('Store.ai_assistant.Module', {
         var input = this.win.down('#input');
         var q = (input.getValue() || '').trim();
         if (!q) { return; }
+        // Gate: the AI only helps after the email is confirmed once.
+        if (!me.getVerifiedEmail()) {
+            me.appendMessage('ai', '⚠️ Confirm your email first — enter it in the field below '
+                + 'and press Confirm. It is a one-time step.');
+            return;
+        }
         input.setValue('');
         this.appendMessage('user', q);
         this.appendMessage('ai', '…gathering account data…');
@@ -383,7 +402,8 @@ Ext.define('Store.ai_assistant.Module', {
     gatherContext: function (cb) {
         var me = this;
         var out = {
-            mileageLimitKm: this.config.mileageLimitKm,
+            company: this.config.company || '',
+            periodDays: this.config.periodDays || 30,
             gatheredAt: new Date().toISOString()
         };
 
@@ -502,22 +522,21 @@ Ext.define('Store.ai_assistant.Module', {
 
         gatherVehicles().then(gatherFines).then(gatherSalik).then(gatherContracts).then(function () {
             if (me.config.gatherTrips !== false && out.vehicles && out.vehicles.length) {
-                me.gatherMonthlyKm(out, cb);
+                me.gatherPeriodKm(out, cb);
             } else {
                 cb(out);
             }
         });
     },
 
-    /* Sum current-month km per vehicle (1 request/vehicle, concurrency-capped).
-       Used for the 4500 km/month limit: overLimit = monthlyKm > limit. */
-    gatherMonthlyKm: function (out, cb) {
+    /* Sum period km per vehicle (1 request/vehicle, concurrency-capped).
+       Period = last 30 days by default. No invented limits — just the numbers. */
+    gatherPeriodKm: function (out, cb) {
         var me = this;
         var now = new Date();
-        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        var ts = Math.floor(monthStart.getTime() / 1000);
+        var periodDays = this.config.periodDays || 30;
+        var ts = Math.floor((now.getTime() - periodDays * 86400000) / 1000);
         var te = Math.floor(now.getTime() / 1000);
-        var limit = this.config.mileageLimitKm || 0;
         var vehicles = out.vehicles;
 
         function sumKm(data) {
@@ -541,10 +560,9 @@ Ext.define('Store.ai_assistant.Module', {
             return fetch(url, { credentials: 'include' })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (d) {
-                    v.monthlyKm = sumKm(d);
-                    v.overLimit = (limit > 0) ? (v.monthlyKm > limit) : false;
+                    v.periodKm = sumKm(d);
                 })
-                .catch(function () { v.monthlyKm = null; });
+                .catch(function () { v.periodKm = null; });
         }
 
         var queue = vehicles.slice();
@@ -557,9 +575,7 @@ Ext.define('Store.ai_assistant.Module', {
         for (var i = 0; i < n; i++) { workers.push(worker()); }
 
         Promise.all(workers).then(function () {
-            out.overLimitVehicles = vehicles.filter(function (v) { return v.overLimit; })
-                .map(function (v) { return v.plate; });
-            out.overLimitCount = out.overLimitVehicles.length;
+            out.periodDays = periodDays;
             cb(out);
         });
     },
@@ -599,6 +615,11 @@ Ext.define('Store.ai_assistant.Module', {
             var cls = m.who === 'user' ? 'ai-msg-user' : 'ai-msg-ai';
             var body = Ext.htmlEncode(m.text).replace(/\n/g, '<br>');
             var actionsHtml = '';
+            if (m.who === 'ai' && me.config.ttsEnabled && m.text.indexOf('⏳') !== 0
+                && m.text.indexOf('⚠️') !== 0 && m.text.length < 800) {
+                actionsHtml += ' <button type="button" class="ai-act-btn ai-speak-btn"'
+                    + ' data-mi="' + mi + '">🔊</button>';
+            }
             (m.actions || []).forEach(function (a, ai) {
                 if (a.type && a.type.indexOf('admin_') === 0) { return; } // server-executed
                 var label = Ext.htmlEncode(a.label || a.type);
@@ -612,6 +633,12 @@ Ext.define('Store.ai_assistant.Module', {
         if (!this._clickBound) {
             this._clickBound = true;
             this.historyEl.on('click', function (e, t) {
+                var spk = Ext.fly(t).findParent('.ai-speak-btn', null, true);
+                if (spk) {
+                    var smi = parseInt(spk.getAttribute('data-mi'), 10);
+                    me.speak(me.history[smi] && me.history[smi].text);
+                    return;
+                }
                 var btn = Ext.fly(t).findParent('.ai-act-btn', null, true);
                 if (!btn) { return; }
                 var mi = parseInt(btn.getAttribute('data-mi'), 10);
@@ -625,6 +652,33 @@ Ext.define('Store.ai_assistant.Module', {
                 });
             });
         }
+    },
+
+    /* Voice read-out of an AI answer (Fish Audio via the backend /tts). */
+    speak: function (text) {
+        var me = this;
+        if (!text) { return; }
+        if (me._audio) { try { me._audio.pause(); } catch (e) {} }
+        fetch(me.config.serverUrl.replace(/\/+$/, '') + '/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+            .then(function (r) {
+                if (!r.ok) {
+                    return r.json().then(function (d) {
+                        throw new Error((d && d.error) || ('HTTP ' + r.status));
+                    });
+                }
+                return r.blob();
+            })
+            .then(function (blob) {
+                var url = URL.createObjectURL(blob);
+                me._audio = new Audio(url);
+                me._audio.onended = function () { URL.revokeObjectURL(url); };
+                me._audio.play().catch(function () {});
+            })
+            .catch(function (e) { me.appendMessage('ai', '🔊 TTS error: ' + e.message); });
     },
 
     /* Run a proposed action against Pilot API v3 (same-origin, session cookie). */

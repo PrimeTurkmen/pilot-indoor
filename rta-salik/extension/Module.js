@@ -121,8 +121,6 @@ Ext.define('Store.rta_salik.Module', {
                 { xtype: 'tbtext', html: '–' },
                 { xtype: 'datefield', itemId: 'rsTo', width: 110, format: 'd.m.Y',
                   emptyText: 'To date', listeners: { change: function () { me.applyFilters(); } } },
-                { xtype: 'checkbox', itemId: 'rsRentalOnly', boxLabel: 'Rental only',
-                  listeners: { change: function () { me.applyFilters(); } } },
                 { xtype: 'tbseparator' },
                 {
                     xtype: 'button', text: 'Linking', iconCls: 'fa fa-link',
@@ -382,7 +380,6 @@ Ext.define('Store.rta_salik.Module', {
     refreshAll: function () {
         var me = this;
         this.loadLinks();
-        this.loadContracts();
         this.loadFleet(function () { me.loadFines(); me.loadSalik(); });
     },
 
@@ -882,26 +879,10 @@ Ext.define('Store.rta_salik.Module', {
     },
 
     loadContracts: function () {
+        // Removed — "rental window" filtering was a wrong concept here.
+        // The operator works with period + trip selection, not rentals.
         var me = this;
-        fetch('/api/v3/rentcar/contracts?status=open,booked,closed', { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (d) {
-                var list = (d && (d.list || d.data)) || [];
-                var windows = {};
-                list.forEach(function (c) {
-                    var raw = c.vehnum || c.vehiclenumber || c.veh_id || '';
-                    if (!raw) { return; }
-                    var key = me.normalizePlate(raw);
-                    var start = me.parseDate(c.date_start || c.start);
-                    var end = me.parseDate(c.date_end || c.end);
-                    if (!windows[key] || (start != null && start < windows[key][0])) {
-                        windows[key] = [start == null ? -Infinity : start, end == null ? Infinity : end];
-                    }
-                });
-                me._rentalWindows = windows;
-                me.applyFilters();
-            })
-            .catch(function () { me._rentalWindows = {}; });
+        me._rentalWindows = {};
     },
 
     applyFilters: function () {
@@ -909,26 +890,14 @@ Ext.define('Store.rta_salik.Module', {
         if (!me.tab) { return; }
         var fromField = me.tab.down('#rsFrom');
         var toField = me.tab.down('#rsTo');
-        var rentalField = me.tab.down('#rsRentalOnly');
         var from = fromField ? fromField.getValue() : null;
         var to = toField ? toField.getValue() : null;
-        var rentalOnly = rentalField ? !!rentalField.getValue() : false;
         var fromTs = from ? from.getTime() : null;
         var toTs = to ? to.getTime() + 86399999 : null;  // inclusive end-of-day
-        var windows = me._rentalWindows || {};
-        var hasWindows = false;
-        for (var k in windows) { hasWindows = true; break; }
 
-        var inRental = function (plateRaw, ts) {
-            if (!hasWindows) { return true; }  // contracts not loaded yet — don't hide everything
-            var w = windows[me.normalizePlate(plateRaw)];
-            if (!w) { return false; }
-            return ts >= w[0] && ts <= w[1];
-        };
         var pass = function (plateRaw, ts) {
             if (fromTs != null && ts < fromTs) { return false; }
             if (toTs != null && ts > toTs) { return false; }
-            if (rentalOnly && !inRental(plateRaw, ts)) { return false; }
             return true;
         };
 

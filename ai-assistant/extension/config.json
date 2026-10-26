@@ -2,9 +2,15 @@
   "serverUrl": "https://pilot-ai.zamtek.ae",
   "model": "deepseek-chat",
   "contextMaxVehicles": 300,
-  "mileageLimitKm": 4500,
+  "company": "rma",
+  "periodDays": 30,
   "gatherVehicles": true,
   "gatherFines": true,
   "gatherContracts": true,
-  "gatherTrips": true
+  "gatherTrips": true,
+  "ttsEnabled": false,
+  "escalation": {
+    "whatsapp": "",
+    "telegram": ""
+  }
 }
