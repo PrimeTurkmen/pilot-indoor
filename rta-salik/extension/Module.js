@@ -44,9 +44,6 @@ Ext.define('Store.rta_salik.Module', {
         this.loadConfig();
         this.loadStyles();
         this.buildTab();
-        // Load data even before the tab is opened — the main-page popup needs it.
-        this.refreshAll();
-        this.injectMapPopup();
     },
 
     loadConfig: function () {
@@ -117,8 +114,6 @@ Ext.define('Store.rta_salik.Module', {
         return {
             cls: 'transparent_buttons',
             items: [
-                { xtype: 'tbtext', itemId: 'rsCounts', html: '<span class="rs-count">…</span>' },
-                { xtype: 'tbseparator' },
                 { xtype: 'textfield', itemId: 'rsSearch', width: 150,
                   emptyText: 'Search by number…', enableKeyEvents: true,
                   listeners: {
@@ -1020,77 +1015,7 @@ Ext.define('Store.rta_salik.Module', {
     },
 
     updateCounts: function (fines) {
-        var unpaid = fines.filter(function (f) { return f.paid === 'No'; }).length;
-        var total = 0;
-        fines.forEach(function (f) { total += (parseFloat(f.amount) || 0); });
-        var el = this.tab && this.tab.down('#rsCounts');
-        if (el && el.rendered) {
-            el.setHtml('<span class="rs-count">' + fines.length + ' fines</span> · '
-                + '<span class="rs-count rs-unpaid">' + unpaid + ' unpaid</span> · '
-                + '<span class="rs-count rs-total">AED ' + Ext.util.Format.number(total, '0,000.00') + '</span>');
-        }
-    },
-
-    /* ------------------------------------------------------------------ */
-    /*  Main-page popup injection (RTA/Salik summary on the car card)      */
-    /* ------------------------------------------------------------------ */
-
-    /* Wrap window.mapContainer.getMarkerContent2 so every car popup on the
-       main map also shows that car's RTA fines + Salik totals. The marker
-       data object carries agentid in `id` / `veh_id`. */
-    injectMapPopup: function () {
-        var me = this;
-        var tries = 0;
-        var hook = function () {
-            var mc = window.mapContainer;
-            if (!mc || typeof mc.getMarkerContent2 !== 'function' || mc._rsHooked) {
-                if (++tries < 60) { setTimeout(hook, 1000); }
-                return;
-            }
-            mc._rsHooked = true;
-            var orig = mc.getMarkerContent2.bind(mc);
-            mc.getMarkerContent2 = function (e) {
-                var html = orig(e);
-                var block = me.popupBlock(e);
-                return block ? html + block : html;
-            };
-        };
-        hook();
-    },
-
-    popupBlock: function (e) {
-        var me = this;
-        if (!e) { return ''; }
-        var vid = String(e.veh_id != null ? e.veh_id : (e.id != null ? e.id : ''));
-        var plateRaw = '';
-        me.fleetStore.each(function (r) {
-            if (String(r.get('vehId') || r.get('agentid') || '') === vid) {
-                plateRaw = r.get('plateRaw');
-                return false;
-            }
-        });
-        if (!plateRaw) { return ''; }
-        var fines = (me.finesData || []).filter(function (f) { return f.plateRaw === plateRaw; });
-        var salikRows = (me.salikData || []).filter(function (s) { return s.plateRaw === plateRaw; });
-        if (!fines.length && !salikRows.length) { return ''; }
-
-        var unpaid = fines.filter(function (f) { return f.paid !== 'Yes'; });
-        var fTotal = 0;
-        fines.forEach(function (f) { fTotal += (parseFloat(f.amount) || 0); });
-        var trips = 0, sTotal = 0;
-        salikRows.forEach(function (s) { trips += (s.trips || 0); sTotal += (s.total || 0); });
-
-        var html = '<table class="info_table">';
-        if (fines.length) {
-            html += '<tr><th><div class="fa fa-tags"></div>RTA fines</th><td>'
-                + unpaid.length + ' unpaid · AED ' + Ext.util.Format.number(fTotal, '0,000.00') + '</td></tr>';
-        }
-        if (salikRows.length) {
-            html += '<tr><th><div class="fa fa-tag"></div>Salik (30d)</th><td>'
-                + trips + ' trips · AED ' + Ext.util.Format.number(sTotal, '0,000.00') + '</td></tr>';
-        }
-        html += '</table>';
-        return html;
+        // No-op — the operator removed the totals counter (nobody needs it).
     },
 
     /* ------------------------------------------------------------------ */
