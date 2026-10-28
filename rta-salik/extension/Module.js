@@ -926,19 +926,20 @@ Ext.define('Store.rta_salik.Module', {
         var selCars = carsField ? (carsField.getValue() || []) : [];
         var hasCars = selCars.length > 0;
 
-        var pass = function (plateRaw, vehId, ts) {
+        var pass = function (plateRaw, vehId, ts, name) {
             if (fromTs != null && ts < fromTs) { return false; }
             if (toTs != null && ts > toTs) { return false; }
             if (hasCars && selCars.indexOf(String(vehId || '')) < 0) { return false; }
             if (q) {
-                var hay = (String(plateRaw || '') + ' ' + String(vehId || '')).toLowerCase();
+                var hay = (String(plateRaw || '') + ' ' + String(name || '')
+                    + ' ' + String(vehId || '')).toLowerCase();
                 if (hay.indexOf(q) < 0) { return false; }
             }
             return true;
         };
 
-        var fines = (me.finesData || []).filter(function (f) { return pass(f.plateRaw, f.vehId, f.dateTs); });
-        var salik = (me.salikData || []).filter(function (s) { return pass(s.plateRaw, s.vehId, s.lastTripTs); });
+        var fines = (me.finesData || []).filter(function (f) { return pass(f.plateRaw, f.vehId, f.dateTs, f.name); });
+        var salik = (me.salikData || []).filter(function (s) { return pass(s.plateRaw, s.vehId, s.lastTripTs, s.name); });
 
         me.finesStore.loadData(fines);
         me.salikStore.loadData(salik);
