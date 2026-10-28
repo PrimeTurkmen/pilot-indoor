@@ -25,8 +25,8 @@
 Ext.define('Store.rta_salik.Module', {
     extend: 'Ext.Component',
     extensionName: 'rta_salik',
-    version: '0.3.0',
-    moduleBuild: '2026-10-28',
+    version: '0.3.1',
+    moduleBuild: '2026-10-28b',
 
     DEFAULT_CONFIG: {
         aiServerUrl: 'https://pilot-ai.zamtek.ae',
@@ -44,10 +44,6 @@ Ext.define('Store.rta_salik.Module', {
         this.loadConfig();
         this.loadStyles();
         this.buildTab();
-        // Load fines/salik right away so the main-map popup can show them
-        // even before the user opens this tab.
-        this.refreshAll();
-        this.injectMapPopup();
     },
 
     loadConfig: function () {
@@ -118,8 +114,8 @@ Ext.define('Store.rta_salik.Module', {
         return {
             cls: 'transparent_buttons',
             items: [
-                { xtype: 'textfield', itemId: 'rsSearch', width: 150,
-                  emptyText: 'Search by number…', enableKeyEvents: true,
+                { xtype: 'textfield', itemId: 'rsSearch', width: 190,
+                  emptyText: 'Find your car by number…', enableKeyEvents: true,
                   listeners: {
                       change: function () { me.applyFilters(); },
                       specialkey: function (f, e) { if (e.getKey() === e.ENTER) { me.applyFilters(); } }
@@ -946,7 +942,6 @@ Ext.define('Store.rta_salik.Module', {
 
         me.finesStore.loadData(fines);
         me.salikStore.loadData(salik);
-        me.updateCounts(fines);
     },
 
     /* Selected cars + dates → email report via the AI backend. */
@@ -1016,73 +1011,6 @@ Ext.define('Store.rta_salik.Module', {
                 Ext.Msg.hide();
                 Ext.Msg.alert('Report', '❌ Send error: ' + e.message);
             });
-    },
-
-    /* ------------------------------------------------------------------ */
-    /*  Main-map popup: inject RTA/Salik rows INTO the existing car card   */
-    /* ------------------------------------------------------------------ */
-
-    /* Wrap window.mapContainer.getMarkerContent2 so the car popup on the
-       main map gains two extra rows (RTA fines + Salik) inside the SAME
-       floating info table — no new element, just extra <tr> rows before
-       the table close. Marker data: e.id = agentid, e.veh_id. */
-    injectMapPopup: function () {
-        var me = this;
-        var tries = 0;
-        var hook = function () {
-            var mc = window.mapContainer;
-            if (!mc || typeof mc.getMarkerContent2 !== 'function' || mc._rsHooked) {
-                if (++tries < 60) { setTimeout(hook, 1000); }
-                return;
-            }
-            mc._rsHooked = true;
-            var orig = mc.getMarkerContent2.bind(mc);
-            mc.getMarkerContent2 = function (e) {
-                var html = orig(e);
-                var rows = me.popupRows(e);
-                if (!rows) { return html; }
-                // Insert the rows into the existing table, before its LAST
-                // closing tag (the popup may end with a lock button div).
-                var idx = html.lastIndexOf('</table>');
-                if (idx < 0) { return html + rows; }
-                return html.slice(0, idx) + rows + html.slice(idx);
-            };
-        };
-        hook();
-    },
-
-    popupRows: function (e) {
-        var me = this;
-        if (!e) { return ''; }
-        var vid = String(e.veh_id != null ? e.veh_id : (e.id != null ? e.id : ''));
-        var plateRaw = '';
-        me.fleetStore.each(function (r) {
-            if (String(r.get('vehId') || r.get('agentid') || '') === vid) {
-                plateRaw = r.get('plateRaw');
-                return false;
-            }
-        });
-        if (!plateRaw) { return ''; }
-        var fines = (me.finesData || []).filter(function (f) { return f.plateRaw === plateRaw; });
-        var salikRows = (me.salikData || []).filter(function (s) { return s.plateRaw === plateRaw; });
-        if (!fines.length && !salikRows.length) { return ''; }
-
-        var unpaid = fines.filter(function (f) { return f.paid !== 'Yes'; });
-        var fTotal = 0;
-        fines.forEach(function (f) { fTotal += (parseFloat(f.amount) || 0); });
-        var trips = 0, sTotal = 0;
-        salikRows.forEach(function (s) { trips += (s.trips || 0); sTotal += (s.total || 0); });
-
-        var rows = '';
-        if (fines.length) {
-            rows += '<tr><th><div class="fa fa-tags"></div>RTA fines</th><td>'
-                + unpaid.length + ' unpaid · AED ' + Ext.util.Format.number(fTotal, '0,000.00') + '</td></tr>';
-        }
-        if (salikRows.length) {
-            rows += '<tr><th><div class="fa fa-tag"></div>Salik (30d)</th><td>'
-                + trips + ' trips · AED ' + Ext.util.Format.number(sTotal, '0,000.00') + '</td></tr>';
-        }
-        return rows;
     },
 
     /* ------------------------------------------------------------------ */
