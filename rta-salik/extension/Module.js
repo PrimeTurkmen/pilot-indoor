@@ -25,8 +25,8 @@
 Ext.define('Store.rta_salik.Module', {
     extend: 'Ext.Component',
     extensionName: 'rta_salik',
-    version: '0.2.0',
-    moduleBuild: '2026-10-25',
+    version: '0.3.0',
+    moduleBuild: '2026-10-28',
 
     DEFAULT_CONFIG: {
         aiServerUrl: 'https://pilot-ai.zamtek.ae',
@@ -44,6 +44,9 @@ Ext.define('Store.rta_salik.Module', {
         this.loadConfig();
         this.loadStyles();
         this.buildTab();
+        // Load data even before the tab is opened — the main-page popup needs it.
+        this.refreshAll();
+        this.injectMapPopup();
     },
 
     loadConfig: function () {
@@ -116,12 +119,31 @@ Ext.define('Store.rta_salik.Module', {
             items: [
                 { xtype: 'tbtext', itemId: 'rsCounts', html: '<span class="rs-count">…</span>' },
                 { xtype: 'tbseparator' },
+                { xtype: 'textfield', itemId: 'rsSearch', width: 150,
+                  emptyText: 'Search by number…', enableKeyEvents: true,
+                  listeners: {
+                      change: function () { me.applyFilters(); },
+                      specialkey: function (f, e) { if (e.getKey() === e.ENTER) { me.applyFilters(); } }
+                  } },
+                { xtype: 'tbseparator' },
+                { xtype: 'combo', itemId: 'rsCars', width: 230,
+                  store: this.fleetStore, queryMode: 'local',
+                  displayField: 'label', valueField: 'vehId',
+                  multiSelect: true, emptyText: 'All cars',
+                  listConfig: { minWidth: 340 },
+                  listeners: { change: function () { me.applyFilters(); } } },
+                { xtype: 'tbseparator' },
                 { xtype: 'datefield', itemId: 'rsFrom', width: 110, format: 'd.m.Y',
                   emptyText: 'From date', listeners: { change: function () { me.applyFilters(); } } },
                 { xtype: 'tbtext', html: '–' },
                 { xtype: 'datefield', itemId: 'rsTo', width: 110, format: 'd.m.Y',
                   emptyText: 'To date', listeners: { change: function () { me.applyFilters(); } } },
                 { xtype: 'tbseparator' },
+                {
+                    xtype: 'button', text: 'Report', iconCls: 'fa fa-envelope',
+                    tooltip: 'Email report for selected cars + dates',
+                    handler: function () { me.sendReport(); }
+                },
                 {
                     xtype: 'button', text: 'Linking', iconCls: 'fa fa-link',
                     tooltip: 'Link Pilot agents to RTA/Salik plates',
@@ -537,13 +559,22 @@ Ext.define('Store.rta_salik.Module', {
                     var v = String(r.get('vehId') || r.get('agentid'));
                     if (v) { nameByVeh[v] = r.get('name') || r.get('plate'); }
                 });
+                var searchField = me.tab.down('#rsSearch');
+                var carsField = me.tab.down('#rsCars');
+                var q = searchField ? (searchField.getValue() || '').trim().toLowerCase() : '';
+                var selCars = carsField ? (carsField.getValue() || []) : [];
+                var hasCars = selCars.length > 0;
                 (segments || []).forEach(function (seg) {
                     var isParking = seg.type === 'parking';
                     var lat = parseFloat(isParking ? seg.lat : seg.startlat);
                     var lon = parseFloat(isParking ? seg.lon : seg.startlon);
                     var vehId = String(seg.veh_id != null ? seg.veh_id : seg.agent_id);
+                    if (hasCars && selCars.indexOf(vehId) < 0) { return; }
+                    var name = seg.veh_name || nameByVeh[vehId] || vehId;
+                    if (q && (String(name).toLowerCase().indexOf(q) < 0
+                        && vehId.toLowerCase().indexOf(q) < 0)) { return; }
                     rows.push({
-                        vehName: seg.veh_name || nameByVeh[vehId] || vehId,
+                        vehName: name,
                         agentid: seg.agent_id != null ? String(seg.agent_id) : vehId,
                         vehId: vehId,
                         type: isParking ? 'Parking' : 'Trip',
@@ -890,23 +921,102 @@ Ext.define('Store.rta_salik.Module', {
         if (!me.tab) { return; }
         var fromField = me.tab.down('#rsFrom');
         var toField = me.tab.down('#rsTo');
+        var searchField = me.tab.down('#rsSearch');
+        var carsField = me.tab.down('#rsCars');
         var from = fromField ? fromField.getValue() : null;
         var to = toField ? toField.getValue() : null;
         var fromTs = from ? from.getTime() : null;
         var toTs = to ? to.getTime() + 86399999 : null;  // inclusive end-of-day
+        var q = searchField ? (searchField.getValue() || '').trim().toLowerCase() : '';
+        var selCars = carsField ? (carsField.getValue() || []) : [];
+        var hasCars = selCars.length > 0;
 
-        var pass = function (plateRaw, ts) {
+        var pass = function (plateRaw, vehId, ts) {
             if (fromTs != null && ts < fromTs) { return false; }
             if (toTs != null && ts > toTs) { return false; }
+            if (hasCars && selCars.indexOf(String(vehId || '')) < 0) { return false; }
+            if (q) {
+                var hay = (String(plateRaw || '') + ' ' + String(vehId || '')).toLowerCase();
+                if (hay.indexOf(q) < 0) { return false; }
+            }
             return true;
         };
 
-        var fines = (me.finesData || []).filter(function (f) { return pass(f.plateRaw, f.dateTs); });
-        var salik = (me.salikData || []).filter(function (s) { return pass(s.plateRaw, s.lastTripTs); });
+        var fines = (me.finesData || []).filter(function (f) { return pass(f.plateRaw, f.vehId, f.dateTs); });
+        var salik = (me.salikData || []).filter(function (s) { return pass(s.plateRaw, s.vehId, s.lastTripTs); });
 
         me.finesStore.loadData(fines);
         me.salikStore.loadData(salik);
         me.updateCounts(fines);
+    },
+
+    /* Selected cars + dates → email report via the AI backend. */
+    sendReport: function () {
+        var me = this;
+        var carsField = me.tab && me.tab.down('#rsCars');
+        var fromField = me.tab && me.tab.down('#rsFrom');
+        var toField = me.tab && me.tab.down('#rsTo');
+        var sel = carsField ? (carsField.getValue() || []) : [];
+        var plates = [];
+        me.fleetStore.each(function (r) {
+            if (!sel.length || sel.indexOf(String(r.get('vehId') || '')) >= 0) {
+                var raw = (r.get('plateRaw') || '').trim();
+                if (raw) { plates.push(raw); }
+            }
+        });
+        if (!plates.length) {
+            Ext.Msg.alert('Report', 'No cars selected and fleet is empty.');
+            return;
+        }
+        var fmtDay = function (d) {
+            var p = function (n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+        };
+        var fromD = fromField && fromField.getValue() ? fmtDay(fromField.getValue()) : '';
+        var toD = toField && toField.getValue() ? fmtDay(toField.getValue()) : '';
+        var verified = '';
+        try { verified = localStorage.getItem('ai_assistant_email_verified') || ''; } catch (e) {}
+        if (verified) {
+            me._doSendReport(plates, fromD, toD, verified);
+            return;
+        }
+        Ext.Msg.prompt('Report', 'Enter the email to receive the report:', function (btn, val) {
+            if (btn !== 'ok' || !val) { return; }
+            me._doSendReport(plates, fromD, toD, val.trim());
+        });
+    },
+
+    _doSendReport: function (plates, fromD, toD, email) {
+        var me = this;
+        var ctx = { vehicles: [], fines: me.finesData || [], salik: me.salikData || [] };
+        me.fleetStore.each(function (r) {
+            ctx.vehicles.push({
+                plate: r.get('plate'),
+                plateRaw: r.get('plateRaw'),
+                name: r.get('name'),
+                model: r.get('model'),
+                odometerKm: r.get('mileage')
+            });
+        });
+        Ext.Msg.wait('Generating report…', 'Report');
+        fetch((me.config.aiServerUrl || '').replace(/\/+$/, '') + '/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                context: ctx, email: email, subject: 'Pilot Fleet Report',
+                from_date: fromD, to_date: toD, plates: plates
+            })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                Ext.Msg.hide();
+                var ok = d.status === 'sent';
+                Ext.Msg.alert('Report', ok ? ('✅ Sent to ' + d.email) : ('❌ ' + (d.error || d.status || 'error')));
+            })
+            .catch(function (e) {
+                Ext.Msg.hide();
+                Ext.Msg.alert('Report', '❌ Send error: ' + e.message);
+            });
     },
 
     updateCounts: function (fines) {
@@ -914,11 +1024,73 @@ Ext.define('Store.rta_salik.Module', {
         var total = 0;
         fines.forEach(function (f) { total += (parseFloat(f.amount) || 0); });
         var el = this.tab && this.tab.down('#rsCounts');
-        if (el) {
+        if (el && el.rendered) {
             el.setHtml('<span class="rs-count">' + fines.length + ' fines</span> · '
                 + '<span class="rs-count rs-unpaid">' + unpaid + ' unpaid</span> · '
                 + '<span class="rs-count rs-total">AED ' + Ext.util.Format.number(total, '0,000.00') + '</span>');
         }
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  Main-page popup injection (RTA/Salik summary on the car card)      */
+    /* ------------------------------------------------------------------ */
+
+    /* Wrap window.mapContainer.getMarkerContent2 so every car popup on the
+       main map also shows that car's RTA fines + Salik totals. The marker
+       data object carries agentid in `id` / `veh_id`. */
+    injectMapPopup: function () {
+        var me = this;
+        var tries = 0;
+        var hook = function () {
+            var mc = window.mapContainer;
+            if (!mc || typeof mc.getMarkerContent2 !== 'function' || mc._rsHooked) {
+                if (++tries < 60) { setTimeout(hook, 1000); }
+                return;
+            }
+            mc._rsHooked = true;
+            var orig = mc.getMarkerContent2.bind(mc);
+            mc.getMarkerContent2 = function (e) {
+                var html = orig(e);
+                var block = me.popupBlock(e);
+                return block ? html + block : html;
+            };
+        };
+        hook();
+    },
+
+    popupBlock: function (e) {
+        var me = this;
+        if (!e) { return ''; }
+        var vid = String(e.veh_id != null ? e.veh_id : (e.id != null ? e.id : ''));
+        var plateRaw = '';
+        me.fleetStore.each(function (r) {
+            if (String(r.get('vehId') || r.get('agentid') || '') === vid) {
+                plateRaw = r.get('plateRaw');
+                return false;
+            }
+        });
+        if (!plateRaw) { return ''; }
+        var fines = (me.finesData || []).filter(function (f) { return f.plateRaw === plateRaw; });
+        var salikRows = (me.salikData || []).filter(function (s) { return s.plateRaw === plateRaw; });
+        if (!fines.length && !salikRows.length) { return ''; }
+
+        var unpaid = fines.filter(function (f) { return f.paid !== 'Yes'; });
+        var fTotal = 0;
+        fines.forEach(function (f) { fTotal += (parseFloat(f.amount) || 0); });
+        var trips = 0, sTotal = 0;
+        salikRows.forEach(function (s) { trips += (s.trips || 0); sTotal += (s.total || 0); });
+
+        var html = '<table class="info_table">';
+        if (fines.length) {
+            html += '<tr><th><div class="fa fa-tags"></div>RTA fines</th><td>'
+                + unpaid.length + ' unpaid · AED ' + Ext.util.Format.number(fTotal, '0,000.00') + '</td></tr>';
+        }
+        if (salikRows.length) {
+            html += '<tr><th><div class="fa fa-tag"></div>Salik (30d)</th><td>'
+                + trips + ' trips · AED ' + Ext.util.Format.number(sTotal, '0,000.00') + '</td></tr>';
+        }
+        html += '</table>';
+        return html;
     },
 
     /* ------------------------------------------------------------------ */
